@@ -1,14 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const SubtaskSchema = new mongoose.Schema({
-    title : {
-        type: String,
-        required: true,
-    },
-    isComplete : {
-        type: Boolean,
-        default: false,
-    }
-}, {timestamps: true});
+const SubtaskSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    isCompleted: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
 
-export const Subtask = mongoose.model('Subtask', SubtaskSchema);
+// export const Subtask = mongoose.model("Subtask", SubtaskSchema);

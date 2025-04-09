@@ -1,16 +1,15 @@
 import express from 'express';
 import {Board} from '../models/board.model.js';
-import {User} from '../models/user.model.js';
 
-/*
-@desc create a new board (admin)
-@route POST /api/v1/boards
-@access Private (Authenticated ones)
+/**
+* @desc create a new board (admin)
+* @route POST /api/v1/boards
+* @access Private (Authenticated ones)
 */
 
 export const createBoard = async (req, res) => {
     try {
-        const {name , color } = req.body;
+        const {name} = req.body;
         const adminId = req.user._id;   // get user id to set the admin
         if(!name){
             return res.status(400).json({msg: 'Please include a name for the board'});
@@ -22,7 +21,6 @@ export const createBoard = async (req, res) => {
         // create a new board with admin as the only member and admin role
         const board = await Board.create({
             name, 
-            color,
             admin: adminId,
             members: [{user: adminId, role: 'admin'}]
         });
@@ -35,10 +33,10 @@ export const createBoard = async (req, res) => {
 }
 
 
-/*
-@desc get boards (boards, user is part of)
-@route GET /api/v1/boards
-@access Private (Authenticated ones)
+/**
+* @desc get boards (boards, user is part of)
+* @route GET /api/v1/boards
+* @access Private (Authenticated ones)
 */
 
 export const getBoards = async (req, res) => {
@@ -56,10 +54,10 @@ export const getBoards = async (req, res) => {
 
 
 
-/*
-@desc get a specific board (admin or member)
-@route GET /api/v1/GET/boards/:boardId
-@access Private (Authenticated ones)
+/**
+* @desc get a specific board (admin or member)
+* @route GET /api/v1/GET/boards/:boardId
+* @access Private (Authenticated ones)
 */
 
 export const getBoardById = async (req, res) => {
@@ -75,10 +73,10 @@ export const getBoardById = async (req, res) => {
 
 
 
-/*
-@desc update a board (admin only)
-@route PATCH /api/v1/boards/:boardId
-@access Private (Authenticated ones)
+/**
+* @desc update a board (admin only)
+* @route PATCH /api/v1/boards/:boardId
+* @access Private (Authenticated ones)
 */
 
 export const updateBoard = async (req, res) => {
@@ -102,10 +100,10 @@ export const updateBoard = async (req, res) => {
 
 
 
-/*
-@desc delete a board (admin only)
-@route DELETE /api/v1/boards/:boardId
-@access Private (Authenticated ones)
+/**
+* @desc delete a board (admin only)
+* @route DELETE /api/v1/boards/:boardId
+* @access Private (Authenticated ones)
 */
 
 export const deleteBoard = async (req, res) => {
@@ -125,10 +123,10 @@ export const deleteBoard = async (req, res) => {
     }
 }
 
-/*
-@desc add a member to a board (admin only)
-@route POST /api/v1/boards/:boardId/members
-@access Private (Authenticated ones)
+/**
+* @desc add a member to a board (admin only)
+* @route POST /api/v1/boards/:boardId/members
+* @access Private (Authenticated ones)
 */
 
 export const addMember = async ( req, res) => {
@@ -147,10 +145,10 @@ export const addMember = async ( req, res) => {
     }
 }
 
-/*
-@desc remove a member from a board (admin only)
-@route DELETE /api/v1/boards/:boardId/members/:userId
-@access Private (Authenticated ones)
+/**
+* @desc remove a member from a board (admin only)
+* @route DELETE /api/v1/boards/:boardId/members/:userId
+* @access Private (Authenticated ones)
 */
 
 export const removeMember = async(req, res) => {

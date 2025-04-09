@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+const SubtaskSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    isCompleted: { type: Boolean, default: false }
+});
+
 const taskSchema = new mongoose.Schema({
     title : {
         type: String,
@@ -26,26 +31,24 @@ const taskSchema = new mongoose.Schema({
     description : {
         type: String
     },
-    subtasks : [{
-        type : mongoose.Schema.Types.ObjectId,
-        ref: "Subtask",
-        required: false,
-    }],
+    color:{
+        type : String,
+        required : true,
+    },
+    subtasks : [SubtaskSchema],
     comments : [{
-        text : {
+        content : {
             type: String,
             required: true,
         },
         user : {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-            required: true,
         },
         createdAt : {
             type: Date,
             default: Date.now,
         },
-        required: false,
     }],
     boardId : {
         type: mongoose.Schema.Types.ObjectId,
@@ -57,6 +60,10 @@ const taskSchema = new mongoose.Schema({
         ref: 'User',
         default: [],
     }],
+    taskAdmin: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
+    }
 
 }, { timestamps: true });
 

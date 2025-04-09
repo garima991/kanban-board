@@ -21,10 +21,6 @@ const boardSchema = new mongoose.Schema({
             default: 'member',
         },
     }],
-    color : {
-        type : String,
-        required : true,
-    },
     columns : {
         type: [{
             name: {
