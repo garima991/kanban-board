@@ -7,7 +7,8 @@ export const verifyJWT = async (req, res, next) => {
   try {
     // Get token from cookie or header
     const tokenFromCookie = req.cookies?.accessToken;
-    const tokenFromHeader = req.header("Authorization")?.replace("Bearer ", "");
+    const headerBearerToken = req.headers.authorization ?? "";
+    const tokenFromHeader = headerBearerToken?.split("Bearer ")[1] ?? "";
     const token = tokenFromCookie || tokenFromHeader;
 
     // If token is missing
@@ -16,7 +17,7 @@ export const verifyJWT = async (req, res, next) => {
     }
 
     // Verify the token using secret key
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
 
     // Find the user by ID in the database (excluding password and refreshToken)
     const user = await User.findById(decoded?._id).select("-password -refreshToken");
@@ -44,10 +45,10 @@ export const verifyJWT = async (req, res, next) => {
 
 
 
-const protect = (req, res, next) => {
-    // Set a dummy user for testing
-    req.user = { _id: "660d5aaf3b6e2b001f4b5e91" };  // Fake user ID
-    next();
-  };
+// const protect = (req, res, next) => {
+//     // Set a dummy user for testing
+//     req.user = { _id: "660d5aaf3b6e2b001f4b5e91" };  // Fake user ID
+//     next();
+//   };
   
-export default protect;
+// export default protect;

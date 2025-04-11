@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Name is required'],
-        unique: true,
         trim: true,
     },
     username : {
@@ -28,7 +27,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        minlength: [8, 'Password must be at least 8 characters long' ],
+        minlength: [8, 'Password must be at least 8 characters long'],
         // add more validation rules
     },
     role:{
@@ -67,7 +66,7 @@ userSchema.methods.generateAccessToken = function() {
         process.env.ACCESS_TOKEN_SECRET_KEY,
         { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME }
     )
-}
+};
 
 userSchema.methods.generateRefreshToken = function() {
     return jwt.sign({
@@ -80,7 +79,7 @@ userSchema.methods.generateRefreshToken = function() {
         process.env.REFRESH_TOKEN_SECRET_KEY,
         { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME }
     )
-}
-
+};
+ 
 
 export const User = mongoose.model('User', userSchema);

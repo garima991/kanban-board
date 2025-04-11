@@ -14,9 +14,6 @@ export const createBoard = async (req, res) => {
         if(!name){
             return res.status(400).json({msg: 'Please include a name for the board'});
         }
-        if(!color){
-            return res.status(400).json({msg: 'Please include a color for the board'});
-        }
 
         // create a new board with admin as the only member and admin role
         const board = await Board.create({
@@ -56,7 +53,7 @@ export const getBoards = async (req, res) => {
 
 /**
 * @desc get a specific board (admin or member)
-* @route GET /api/v1/GET/boards/:boardId
+* @route GET /api/v1/boards/:boardId
 * @access Private (Authenticated ones)
 */
 
@@ -82,9 +79,9 @@ export const getBoardById = async (req, res) => {
 export const updateBoard = async (req, res) => {
     try {
         const boardId = req.params.boardId;
-        const {name, color} = req.body;
+        const {name} = req.body;
 
-        const board = await Board.findOneAndUpdate({ _id: boardId },{name, color}, {new: true});
+        const board = await Board.findOneAndUpdate({ _id: boardId },{name}, {new: true});
 
         if (!board) {
             return res.status(404).json({ message: 'Board not found' });
@@ -129,21 +126,28 @@ export const deleteBoard = async (req, res) => {
 * @access Private (Authenticated ones)
 */
 
-export const addMember = async ( req, res) => {
+export const addMember = async (req, res) => {
     try {
-        const boardId = req.params.boardId;
-        const {userId, role} = req.body;
-
-        const board = await Board.findOneAndUpdate({_id: boardId}, {$push: {members: {user: userId, role}}}, {new: true});
-        if (!board) {
-            return res.status(404).json({ message: 'Board not found' });
-        }
-        res.status(200).json({message: 'Member added successfully', board});
+      const boardId = req.params.boardId;
+      const { userId, role } = req.body;
+  
+      const board = await Board.findById(boardId);
+      if (!board) return res.status(404).json({ message: 'Board not found' });
+  
+      const isAlreadyMember = board.members.some(member => member.user.toString() === userId);
+      if (isAlreadyMember) {
+        return res.status(400).json({ message: 'User already a member of the board' });
+      }
+  
+      board.members.push({ user: userId, role });
+      await board.save();
+  
+      res.status(200).json({ message: 'Member added successfully', board });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-    catch (error){
-        res.status(500).json({error: error.message});
-    }
-}
+  };
+  
 
 /**
 * @desc remove a member from a board (admin only)
@@ -154,10 +158,14 @@ export const addMember = async ( req, res) => {
 export const removeMember = async(req, res) => {
     try {
         const boardId = req.params.boardId;
-        const userId = req.params.userId;
+        const userId = req.params.userId;     
 
         const board = await Board.findOneAndUpdate({_id: boardId}, {$pull: {members: {user: userId}}}, {new: true});
 
+        if (board.admin.toString() === userId) {
+            return res.status(403).json({ message: "Admin cannot remove themselves from the board" });
+        }
+     
         if(!board) {
             return res.status(404).json({ message: 'Board not found' });    
         }

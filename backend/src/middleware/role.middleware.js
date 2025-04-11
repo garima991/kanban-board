@@ -1,7 +1,8 @@
 import {Board} from '../models/board.model.js'
 import { Task } from '../models/task.model.js';
 
-// middleware to check if user is a member of the board
+
+//~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ middleware to check if user is a member of the board ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 export const isBoardMember = async (req, res, next) => {
     try {
@@ -26,7 +27,8 @@ export const isBoardMember = async (req, res, next) => {
     }
 }
 
-// middleware to check if user is an admin of the board
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ middleware to check if user is an admin of the board ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 export const isBoardAdmin = async (req, res, next) => {
     try {
@@ -50,7 +52,9 @@ export const isBoardAdmin = async (req, res, next) => {
     }
 }
 
-// middleware to check if user is an admin of the task or board admin
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ middleware to check if user is an admin of the task or board admin ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
 export const isTaskOrBoardAdmin = async (req, res, next) => {
     try {
         const { boardId, taskId } = req.params;
@@ -72,7 +76,7 @@ export const isTaskOrBoardAdmin = async (req, res, next) => {
 };
 
 
-// middleware to check if task owner or assignee or board admin
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ middleware to check if task owner or assignee or board admin ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 export const isTaskMember = async (req, res, next) => {
     try {

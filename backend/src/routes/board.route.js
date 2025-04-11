@@ -1,23 +1,23 @@
 import express from 'express';
 import { addMember, createBoard, deleteBoard, getBoardById, getBoards, removeMember, updateBoard } from '../controllers/board.controller.js';
 import { isBoardAdmin, isBoardMember } from '../middleware/role.middleware.js';
-import protect from '../middleware/auth.middleware.js';
+import {verifyJWT} from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, createBoard);
+router.post('/', verifyJWT, createBoard);
 
-router.get('/', protect, getBoards);
+router.get('/', verifyJWT, getBoards);
 
-router.get('/:boardId', protect, isBoardMember, getBoardById);
+router.get('/:boardId', verifyJWT, isBoardMember, getBoardById);
 
-router.patch('/:boardId', protect, isBoardMember, updateBoard);
+router.patch('/:boardId', verifyJWT, isBoardMember, updateBoard);
 
-router.delete('/:boardId', protect, isBoardAdmin, deleteBoard);
+router.delete('/:boardId', verifyJWT, isBoardAdmin, deleteBoard);
 
-router.post('/:boardId/members', protect, isBoardAdmin, addMember);
+router.post('/:boardId/members', verifyJWT, isBoardAdmin, addMember);
 
-router.delete('/:boardId/members/:userId', protect, isBoardAdmin, removeMember);
+router.delete('/:boardId/members/:userId', verifyJWT, isBoardAdmin, removeMember);
 
 
 export default router;
