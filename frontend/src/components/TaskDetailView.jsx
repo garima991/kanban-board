@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { boardsApi, tasksApi, usersApi } from "../apis/axiosInstance";
 import toast from "react-hot-toast";
 import {
@@ -17,6 +17,7 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
   const [inviteDropdown, setInviteDropdown] = useState([]);
   const [loadingAssign, setLoadingAssign] = useState(false);
   const [assignees, setAssignees] = useState([]);
+  const inviteRef = useRef(null);
 
   // Fetch board members on open
   const fetchBoardMembers = async (boardId) => {
@@ -69,9 +70,26 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
       );
       setInviteDropdown(filtered);
     } else {
-      setInviteDropdown([]);
+      setInviteDropdown(boardMembers);
     }
   }, [inviteInput, boardMembers]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutsideInvite = (e) => {
+      if (inviteRef.current && !inviteRef.current.contains(e.target)) {
+        setShowInvite(false);
+      }
+    };
+
+    if (showInvite) {
+      document.addEventListener("mousedown", handleClickOutsideInvite);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideInvite);
+    };
+  }, [showInvite]);
 
   // Assign user to a task
   const handleAssign = async (user) => {
@@ -158,7 +176,10 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
                   Invite
                 </button>
                 {showInvite && (
-                  <div className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-20 w-48 p-2">
+                  <div
+                    ref={inviteRef}
+                    className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-20 w-48 p-2"
+                  >
                     <input
                       className="w-full p-1 border rounded mb-2 text-xs"
                       placeholder="Type name..."
@@ -170,7 +191,7 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
                         inviteDropdown.map((user) => (
                           <div
                             key={user._id}
-                            className="p-1 hover:bg-blue-100 rounded cursor-pointer text-sm"
+                            className="flex justify-start p-1 hover:bg-blue-100 rounded cursor-pointer text-sm"
                             onClick={() => handleAssign(user)}
                           >
                             {user.name}

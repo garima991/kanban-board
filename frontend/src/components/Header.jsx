@@ -22,6 +22,7 @@ const Header = ({ activeView, setActiveView }) => {
   const [userDropdown, setUserDropdown] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
   const [showUsers, setShowUsers] = useState(false);
+  const inviteRef = useRef(null);
 
   // Fetch all users
   const fetchAllUsers = async () => {
@@ -68,25 +69,25 @@ const Header = ({ activeView, setActiveView }) => {
     }
   };
 
-  // Close modal on click outside
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) {
-        handleCloseModal();
-      }
-    };
-    const handleEsc = (e) => e.key === "Escape" && handleCloseModal();
-    if (isSearchModalOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleEsc);
+  const handleClickOutsideInvite = (e) => {
+    if (inviteRef.current && !inviteRef.current.contains(e.target)) {
+      setShowUsers(false);
     }
+  };
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEsc);
-    };
-  }, [isSearchModalOpen, showUsers]);
+  if (showUsers) {
+    document.addEventListener("mousedown", handleClickOutsideInvite);
+  }
 
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutsideInvite);
+  };
+}, [showUsers]);
+
+
+  
   // fetch all board members
   const fetchBoardMembers = async (boardId) => {
     try {
@@ -117,6 +118,8 @@ const Header = ({ activeView, setActiveView }) => {
     }
   }, [activeBoard]);
 
+  
+
   // Open search modal
   const handleOpenModal = () => {
     setIsSearchModalOpen(true);
@@ -130,6 +133,26 @@ const Header = ({ activeView, setActiveView }) => {
     setSearchTerm("");
     setSearchResults([]);
   };
+
+  // Close search modal on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalRef.current.contains(e.target)) {
+        handleCloseModal();
+      }
+    };
+    const handleEsc = (e) => e.key === "Escape" && handleCloseModal();
+    if (isSearchModalOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEsc);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [isSearchModalOpen, showUsers]);
+
 
   // Debounced search
   const handleSearch = debounce(async (term) => {
@@ -173,7 +196,10 @@ const Header = ({ activeView, setActiveView }) => {
             <GoPersonAdd /> Invite
           </button>
           {showUsers && (
-            <div className="absolute right-4 top-14 z-50 bg-white border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64">
+            <div
+              ref={inviteRef}
+              className="absolute right-4 top-14 z-50 bg-white border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64"
+            >
               <input
                 type="text"
                 placeholder="Search users..."
