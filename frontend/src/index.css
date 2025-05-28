@@ -4,6 +4,14 @@
 @tailwind utilities;
 
 
+@layer utilities {
+  .no-clear::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
+}
+
 body {
   margin: 0;
   padding: 0;

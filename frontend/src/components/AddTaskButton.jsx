@@ -1,14 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useModal } from "../contexts/TaskModalContext";
+import { useTaskModal } from "../contexts/TaskModalContext";
 import AddTaskForm from "../modals/AddTaskForm";
 
 const AddTaskButton = () => {
-  const {setIsOpen} = useModal();
+  const {setTaskFormOpen} = useTaskModal();
   return (
     <div >
       <button
-        onClick={() => setIsOpen(true)}
-        className="bg-black text-white font-medium px-4 py-2 rounded hover:opacity-90"
+        onClick={() => setTaskFormOpen(true)}
+        className="bg-black text-white font-medium px-4 py-1 rounded-lg hover:opacity-90"
       >
          + New Task
       </button>
@@ -17,18 +17,18 @@ const AddTaskButton = () => {
   );
 };
 
-const AddTaskModal = () => {
-  const { isOpen, setIsOpen } = useModal();
+export const AddTaskModal = () => {
+  const { isTaskFormOpen, setTaskFormOpen } = useTaskModal();
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isTaskFormOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => setIsOpen(false)}
-          className="bg-slate-900/20 backdrop-blur p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
+          onClick={() => setTaskFormOpen(false)}
+          className="bg-slate-500/20 backdrop-blur-sm p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
         >
          <AddTaskForm />
         </motion.div>
@@ -36,6 +36,7 @@ const AddTaskModal = () => {
     </AnimatePresence>
   );
 };
+
 
 
 export default AddTaskButton;

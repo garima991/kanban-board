@@ -1,50 +1,86 @@
-import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useMemo, useState } from "react";
+import TaskCard from "./TaskCard";
+import { useTaskModal } from "../contexts/TaskModalContext";
+import { AddTaskModal } from "./AddTaskButton";
 import { FaRegCircle } from "react-icons/fa";
-import TaskCard from './TaskCard';
+import TaskDetailView from "./TaskDetailView";
 
-const Column = ({colIndex}) => {
-    const boards = useSelector((state) => state.kanban);
-    const board = boards.find((board) => board.isActive === true);
-    // console.log(board);
-    const column = board.columns.find((col, index) => index === colIndex);
-    // console.log(column);
-    const tasks = column.tasks;
-    console.log(column.tasks);
-    {tasks.map((task) => {
-      console.log(task.title);
-    })}
+const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTasksUpdate }) => {
+  const { setTaskFormOpen } = useTaskModal();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
 
-    const dispatch = useDispatch(); // dispatch dragTask
+  const columnTasks = useMemo(() => {
+    return tasks.filter((task) => task.status === column.name);
+  }, [tasks, column.name]);
 
-    const circleColor = () => {
-        if (column.name === "Todo") {
-          return "#808080"; 
-        }
-        else if (column.name === "On Progress") {
-          return "#0000FF"; 
-        }
-        else if (column.name === "In Review") {
-          return "#FFA500"; 
-        }
-        else {
-          return "#008000";  
-        }
-      };
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    const { taskId, prevStatus } = JSON.parse(e.dataTransfer.getData("text"));
     
+    if (prevStatus !== column.name) {
+      try {
+        await onTaskStatusChange(taskId, column.name);
+      } catch (error) {
+        console.error("Failed to update task status:", error);
+      }
+    }
+  };
+
+  const handleOnDragOver = (e) => e.preventDefault();
+
+  const handleTaskClick = (taskId) => {
+    setSelectedTaskIndex(taskId);
+    setModalOpen(true);
+  };
+
+  const colorMap = {
+    "To Do": "#808080",
+    "On Progress": "#0000FF",
+    "In Review": "#FFA500",
+    "Completed": "#008000",
+  };
+
+  const circleColor = colorMap[column.name];
+
   return (
-    <div className='flex flex-col justify-start flex-1 min-w-32 gap-2 h-screen'>
-      <div className='sticky top-0 flex items-center justify-center gap-2 font-semibold bg-[#F3F5F9] px-2 py-2 rounded-md'>
-        <FaRegCircle color={circleColor()}/>
-        <h3 className='text-nowrap'>{column.name}({column.tasks.length})</h3>
-      </div>
-        <div className='flex flex-col gap-3 py-2 px-1'>
-            {tasks.map((_, index) => {
-                return <TaskCard key = {index} taskIndex = {index} colIndex = {colIndex}/>
-            })}
+    <div className="flex flex-col justify-start flex-1 min-w-64 gap-2 h-screen ">
+      <div className="sticky top-36 flex items-center justify-between gap-2 font-semibold bg-[#F3F5F9] px-4 py-2 rounded-md ">
+        <div className="flex items-center gap-2">
+          <FaRegCircle color={circleColor} />
+          <h3 className="text-nowrap">
+            {column.name} ({columnTasks.length})
+          </h3>
         </div>
+        <button
+          className="text-gray-700 cursor-pointer hover:text-blue-600 transition-colors"
+          onClick={() => setTaskFormOpen(true)}
+        >
+          +
+        </button>
+      </div>
+      <AddTaskModal onTaskAdded={onTasksUpdate} />
+      <div
+        className="max-h-[72vh] mt-14 flex flex-col flex-1 gap-3 py-2 px-1 "
+        onDrop={handleDrop}
+        onDragOver={handleOnDragOver}
+      >
+        {columnTasks.map((task) => (
+          <TaskCard
+            key={task._id}
+            task={task}
+            colIndex={colIndex}
+            onTaskClick={handleTaskClick}
+          />
+        ))}
+      </div>
+      <TaskDetailView
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        task={columnTasks.find((t) => t._id === selectedTaskIndex)}
+      />
     </div>
-  )
-}
+  );
+};
 
 export default Column;

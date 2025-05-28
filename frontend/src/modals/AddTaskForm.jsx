@@ -1,65 +1,106 @@
 import { motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
-import { useModal } from "../contexts/TaskModalContext";
+import { useTaskModal } from "../contexts/TaskModalContext";
 import { useSelector, useDispatch } from "react-redux";
-import { addTask } from "../redux/features/boardSlice";
+import { addTask } from "../redux/features/boardSliceOld.js";
 import { useState } from "react";
+import { tasksApi } from "../apis/axiosInstance.js";
+import toast from "react-hot-toast";
 
 const AddTaskForm = () => {
-  const { setIsOpen } = useModal();
-  const board = useSelector((state) => state.kanban).find(
+  const { setTaskFormOpen } = useTaskModal();
+  const board = useSelector((state) => state.kanban.value).find(
     (board) => board.isActive
   );
+  const boardId = board._id;
   const dispatch = useDispatch();
 
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [status, setStatus] = useState("To-Do");
+  const [status, setStatus] = useState("To Do");
   const [priority, setPriority] = useState("Medium");
-  const [tags, setTags] = useState({ Other: "" }); // custom tags
+  const [tags, setTags] = useState("Web App"); // custom tags
   const [description, setDescription] = useState("");
-  const [attachments, setAttachments] = useState([]);
-  const [subTasks, setSubTasks] = useState([
-    { title: "", isComplete: false, id: uuidv4() },
-    { title: "", isComplete: false, id: uuidv4() },
-  ]);
-  const [comments, setComments] = useState(["", ""]);
-
-  const validStatus = ["To-Do", "In Progress", "Done"];
+  // const [subTasks, setSubTasks] = useState([
+  //   { title: "", isComplete: false, id: uuidv4() },
+  // ]);
+  // const [comments, setComments] = useState([""]);
+ const validStatus = ["To Do", "On Progress", "In Review", "Completed"];
   const validPriorities = ["Low", "Medium", "High"];
+  const validTags = ["Mobile App","Dashboard", "Web App"];
 
-  const onDeleteSubtask = (id) => {
-    setSubTasks((prev) => prev.filter((subtask) => subtask.id !== id));
-  };
 
-  const onDeleteComment = (index) => {
-    setComments((prevComment) => prevComment.filter((_, i) => i !== index));
-  };
+  const validateForm = () => {
+    if (title.trim() === "") {
+      alert("Task title is required");
+      return false;
+    }
+    if (!dueDate) {
+      alert("Due date is required");
+      return false;
+    }
+    if (description.trim() === "") {
+      alert("Description is required");
+      return false;
+    }
+    if (title.length > 50) {
+      alert("Task title cannot exceed 50 characters");
+      return false;
+    }
+    if (description.length > 200) {
+      alert("Description cannot exceed 200 characters");
+      return false;
+    }
+    return true;
+  }
 
-  const handleSubmit = () => {
-    dispatch(
-      addTask({
-        title,
-        dueDate,
-        status,
-        tags: { priority, ...tags },
-        description,
-        attachments,
-        subTasks,
-        comments,
+  // const onDeleteSubtask = (id) => {
+  //   setSubTasks((prev) => prev.filter((subtask) => subtask.id !== id));
+  // };
+
+  // const onDeleteComment = (index) => {
+  //   setComments((prevComment) => prevComment.filter((_, i) => i !== index));
+  // };
+
+  const handleSubmit = async () => {
+    const isValid = validateForm();
+    if (!isValid) return;
+    try{
+      await tasksApi.createTask(boardId, {
+      title,
+      description,
+      dueDate,
+      priority,
+      status,
+      tags,
+      color :  'blue-50',
+      // subTasks : subTasks.map(subtask => ({
+      //   title : subtask.title,
+      //   isComplete : subtask.isComplete,
+      // })),
+      // comments : comments.map(comment => ({
+      //   comment : comment,
+      // })),
       })
-    );
-    setIsOpen(false);
+      toast.success("Task Created Successfully !");
+    }
+    catch(error){
+      console.log("Error while creating task !", error);
+      toast.error("Error while creating task !");
+    }
+   
+    setTaskFormOpen(false);
   };
 
   return (
     <motion.div
-      animate={{ scale: 1, rotate: "0deg" }}
-      exit={{ scale: 0, rotate: "0deg" }}
+      animate={{ scale: 1}}
+      exit={{ scale: 0}}
+      // transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={(e) => e.stopPropagation()}
-      className="bg-gradient-to-br from-gray-100 to-gray-300 text-white py-2 rounded-3xl w-full max-w-lg shadow-xl cursor-default relative overflow-hidden"
+      className="bg-white text-white py-2 rounded-xl w-full max-w-lg shadow-xl cursor-default relative overflow-hidden"
     >
-      <div className="relative z-10 flex flex-col justify-center items-center gap-4">
+      <div className="relative z-40 flex flex-col justify-center items-center gap-4">
         <h3 className="font-bold text-black text-2xl p-3">Add New Task</h3>
 
         {/* title */}
@@ -78,7 +119,9 @@ const AddTaskForm = () => {
           onChange={(e) => setDueDate(e.target.value)}
           className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
         />
+        
 
+        <div className="flex justify-between items-center w-5/6 gap-2">
         {/* status */}
         <select
           value={status}
@@ -105,14 +148,23 @@ const AddTaskForm = () => {
           ))}
         </select>
 
-        {/* custom Tags */}
-        <input
-          type="text"
-          placeholder="Other Tags (Project, Type)"
-          value={tags.Other}
-          onChange={(e) => setTags({ ...tags, Other: e.target.value })}
+        {/* tags */}
+        <select
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
           className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
-        />
+        >
+          {validTags.map((tags, idx) => (
+            <option key={idx} value={tags}>
+              {tags}
+            </option>
+          ))}
+        </select>
+
+        </div>
+
+      
+      
 
         {/* Description */}
         <textarea
@@ -123,9 +175,9 @@ const AddTaskForm = () => {
         />
 
         {/* Subtasks */}
-        <div className="flex flex-col justify-center items-center gap-1 w-full">
+        {/* <div className="flex flex-col items-center gap-1 w-full">
           <div className="flex gap-2">
-            <h4 className="text-black font-semibold text-base">
+            <h4 className="text-black font-normal text-base">
               Subtasks
               <button
                 className="text-black font-semibold text-xl px-1"
@@ -193,13 +245,13 @@ const AddTaskForm = () => {
               </button>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* comments */}
-
-        <div className="flex flex-col justify-center items-center gap-1 w-full">
+{/* 
+        <div className="flex flex-col items-center gap-1 w-full">
           <div className="flex gap-2">
-            <h4 className="text-black font-semibold text-base">
+            <h4 className="text-black font-normal text-base">
               Comments
               <button
                 className="text-black font-semibold text-xl px-1"
@@ -264,12 +316,12 @@ const AddTaskForm = () => {
               </button>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Submit Button */}
         <button
           onClick={handleSubmit}
-          className="bg-violet-900 text-white font-semibold p-2 rounded-xl hover:scale-105"
+          className="mt-2 mb-2 bg-blue-900 text-white font-normal p-2 rounded-md hover:scale-105"
         >
           Add Task
         </button>

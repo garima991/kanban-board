@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import boardSlice from '../redux/features/boardSlice'
+import boardSlice from '../redux/features/boardSlice.js';
+import authSlice from '../redux/features/authSlice.js'
 
 const store = configureStore({
     reducer : {
         kanban : boardSlice,
+        auth : authSlice,
     }
 });
 

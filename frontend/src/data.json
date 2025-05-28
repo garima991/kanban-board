@@ -16,10 +16,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",
@@ -48,42 +44,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "Todo",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",
@@ -108,38 +68,7 @@
                 {
                     "name": "On Progress",
                     "tasks": [
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "On Progress",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdaddqwaqedawwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
+                       
                         {
                             "title": "Build UI",
                             "dueDate": "32112",
@@ -149,10 +78,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",
@@ -181,106 +106,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "state" : "On Progress",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "state" : "On Progress",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "state" : "On Progress",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",
@@ -314,10 +139,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",
@@ -346,138 +167,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "In Review",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "In Review",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "In Review",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "In Review",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",
@@ -511,10 +200,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",
@@ -543,138 +228,6 @@
                                 "Other": "Mobile"
                             },
                             "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "Completed",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "Completed",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "Completed",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
-                            "subtasks": [
-                                {
-                                    "title": "Signup page",
-                                    "isCompleted": true
-                                },
-                                {
-                                    "title": "Signin page",
-                                    "isCompleted": false
-                                },
-                                {
-                                    "title": "Welcome page",
-                                    "isCompleted": false
-                                }
-                            ],
-                            "comments": [
-                                "comment1",
-                                "comment2"
-                            ]
-                        },
-                        {
-                            "title": "Build UI",
-                            "dueDate": "32112",
-                            "status": "Completed",
-                            "tags": {
-                                "priority": "Medium",
-                                "Other": "Mobile"
-                            },
-                            "description": "qwdewesdad",
-                            "attachments": [
-                                "file1",
-                                "file2"
-                            ],
                             "subtasks": [
                                 {
                                     "title": "Signup page",

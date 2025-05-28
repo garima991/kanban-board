@@ -1,47 +1,73 @@
-import React, { useState } from "react";
-import {
-  FiChevronsRight,
-  FiHome,
-} from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiChevronsRight, FiHome } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa6";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
-import { setBoardActive } from "../redux/features/boardSlice";
+import { useBoardModal } from "../contexts/BoardModalContext";
+import NewBoardModal from "../modals/NewBoardModal";
+import { boardsApi } from "../apis/axiosInstance.js";
+import { setBoardActive, setBoards } from "../redux/features/boardSlice.js";
+import ProfileSection from "./ProfileSection.jsx";
 
 const Sidebar = () => {
-  const [open, setOpen] = useState(true);
-  const boards = useSelector((state) => state.kanban);
-  // console.log(boards);
-  // boards.map((board, index) => {
-  //   console.log(board.name);
-  // })
-  const activeBoard = boards?.find((board) => board.isActive);
+  const [open, setOpen] = useState(false);
+  const {setBoardFormOpen} = useBoardModal();
+
   const dispatch = useDispatch();
-  
+  const user = useSelector((state) => state.auth.user);
+
+  // Fetch boards on mount
+  useEffect(() => {
+    const fetchBoards = async () => {
+      try{
+        const response = await boardsApi.getBoards();
+        console.log(response);
+        dispatch(setBoards(response.data.boards)); 
+      }
+      catch(error){
+        const {response} = error;
+        const err = response?.data
+        console.log("Error fetching boards", err);
+      }
+    }
+
+    fetchBoards();
+  }, [dispatch, user]);
+
+  const boards = useSelector((state) => state.kanban.value);
+
   return (
     <motion.nav
       layout
-      className="sticky shrink-0 border-r border-slate-300 bg-white p-2 z-20"
+      className="sticky shrink-0 border-r border-slate-300 bg-white p-2 z-20 h-screen"
       style={{
         width: open ? "225px" : "fit-content",
       }}
+      // onMouseEnter={() => setOpen(true)} 
+      // onMouseLeave={() => setOpen(false)}
     >
       <TitleSection open={open} />
-        
-        <div className="space-y-1">
-        {boards && boards.map((board, index) => (
-          // console.log(board.name)
-          <Option
-            key={index}
-            Icon={FiHome} 
-            title={board.name}
-            isActive={board.isActive}
-            setIsActive={() => dispatch(setBoardActive(board.name))}
-            open = {open}
-          />
-        ))}
 
-        <Option Icon = {FaPlus} title = "Create Board" open={open} />
+      <div className="space-y-1">
+        {boards &&
+          boards.map((board, index) => (
+            // console.log(board.name)
+            <Option
+              key={index}
+              Icon={FiHome}
+              title={board.name}
+              isActive={board.isActive}
+              setIsActive={() => dispatch(setBoardActive(board.name))}
+              open={open}
+            />
+          ))}
+
+         <Option Icon={FaPlus} title="Create Board" open={open}  setBoardForm={() => {setBoardFormOpen(true)}}/>
+          <AddBoardModal/>
+      </div>
+
+      <div>
+          <ProfileSection open={open} />
       </div>
 
       <ToggleClose open={open} setOpen={setOpen} />
@@ -49,19 +75,24 @@ const Sidebar = () => {
   );
 };
 
-const Option = ({ Icon, title, isActive = false, setIsActive = "", open}) => {
+const Option = ({ Icon, title, isActive, setIsActive , open, setBoardForm}) => {
   // console.log(title, isActive);
   return (
     <motion.button
       layout
-      onClick={() => setIsActive()}
+      onClick={() => {
+        if (setBoardForm) setBoardForm();
+        if (setIsActive) setIsActive();
+      }}
+      
       title
-      className={`relative flex h-10 w-full items-center rounded-md transition-colors ${isActive ? "bg-purple-100 text-purple-700" : "text-slate-500 hover:bg-slate-100"}`}
+      className={`relative flex h-10 w-full items-center rounded-md transition-colors ${
+        isActive
+          ? "bg-blue-100 text-blue-700"
+          : "text-slate-500 hover:bg-slate-100"
+      }`}
     >
-      <motion.div
-        layout
-        className="flex w-10 justify-center text-lg"
-      >
+      <motion.div layout className="flex w-10 justify-center text-lg">
         <Icon />
       </motion.div>
       {open && (
@@ -71,7 +102,6 @@ const Option = ({ Icon, title, isActive = false, setIsActive = "", open}) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.125 }}
           className="text-base font-medium"
-          // title
         >
           {title}
         </motion.span>
@@ -84,8 +114,8 @@ const TitleSection = ({ open }) => {
   return (
     <div className="mb-3 border-b border-slate-300 pb-3">
       <div className="flex cursor-pointer items-center justify-between rounded-md transition-colors hover:bg-slate-100">
-      <div className="flex items-center gap-2">
-      <Logo />
+        <div className="flex items-center gap-2">
+          <Logo />
           {open && (
             <motion.div
               layout
@@ -93,7 +123,7 @@ const TitleSection = ({ open }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.125 }}
             >
-              <span className="block text-xl font-extrabold">KanBan Board</span>
+              <span className="block text-xl font-extrabold">Taskora</span>
             </motion.div>
           )}
         </div>
@@ -106,25 +136,9 @@ const Logo = () => {
   return (
     <motion.div
       layout
-      className="grid size-10 shrink-0 place-content-center rounded-md bg-purple-900"
+      className="grid size-10 shrink-0 place-content-center rounded-md bg-blue-900"
     >
-      <svg
-        width="24"
-        height="auto"
-        viewBox="0 0 50 39"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="fill-slate-50"
-      >
-        <path
-          d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z"
-          stopColor="#000000"
-        ></path>
-        <path
-          d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z"
-          stopColor="#000000"
-        ></path>
-      </svg>
+      
     </motion.div>
   );
 };
@@ -160,5 +174,26 @@ const ToggleClose = ({ open, setOpen }) => {
     </motion.button>
   );
 };
+
+const AddBoardModal = () => {
+  const { isBoardFormOpen, setBoardFormOpen } = useBoardModal();
+
+  return (
+    <AnimatePresence>
+      {isBoardFormOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setBoardFormOpen(false)}
+          className="bg-slate-900/20 p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
+        >
+         <NewBoardModal />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 
 export default Sidebar;
