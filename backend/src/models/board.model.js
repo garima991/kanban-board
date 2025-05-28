@@ -20,12 +20,13 @@ const boardSchema = new mongoose.Schema({
             enum: ['admin', 'member'],
             default: 'member',
         },
+        
     }],
     columns : {
         type: [{
             name: {
                 type: String,
-                enum: ["To-Do", "On Progress", "In Review", "Completed"],
+                enum: ["To Do", "On Progress", "In Review", "Completed"],
                 required: true,
             },
             tasks: [{
@@ -36,7 +37,7 @@ const boardSchema = new mongoose.Schema({
         },
     ],
     default: [
-        { name: "To-Do", tasks: [] },
+        { name: "To Do", tasks: [] },
         { name: "On Progress", tasks: [] },
         { name: "In Review", tasks: [] },
         { name: "Completed", tasks: [] },

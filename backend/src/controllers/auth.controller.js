@@ -71,17 +71,17 @@ export const loginUser = async (req, res) => {
     const { email, username, password } = req.body;
 
     if (!email && !username) {
-      return res.status(400).json({ message: "Email or username is required" });
+      return res.status(400).json({ error: "Email or username is required" });
     }
 
     const user = await User.findOne({ $or: [{ email }, { username }] });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const { accessToken, refreshToken } = await generateTokens(user);

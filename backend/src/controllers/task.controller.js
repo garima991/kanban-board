@@ -15,7 +15,7 @@ export const createTask = async (req, res) => {
       return res.status(404).json({ message: "Board not found" });
     }
 
-    const { title, dueDate, description, status, priority, tags, color } =
+    const { title, dueDate, description, status, priority, tags, color, subtasks, comments } =
       req.body;
     const taskAdmin = req.user._id;
 
@@ -36,6 +36,7 @@ export const createTask = async (req, res) => {
       color,
       taskAdmin,
       assignedTo: [taskAdmin],
+    
     });
 
     res.status(201).json({ message: "Task created successfully", task });
@@ -277,28 +278,34 @@ export const removeTaskMember = async (req, res) => {
 
 
 /**
- * @desc change task status (e.g. ToDo → InProgress)
- * @route PATCH /api/v1/:boardId/tasks/:taskId/status
- * @access Private (Task members only)
+ * @desc Change task status
+ * @route PATCH /boards/:boardId/tasks/:taskId/status
+ * @access Private (Board members)
  */
-
 export const changeTaskStatus = async (req, res) => {
   try {
     const { taskId } = req.params;
     const { status } = req.body;
 
-    if (!status) return res.status(400).json({ message: "Status is required" });
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+
+    const validStatuses = ['To Do', 'On Progress', 'In Review', 'Completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
 
     const task = await Task.findById(taskId);
-    if (!task) return res.status(404).json({ message: "Task not found" });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
 
     task.status = status;
     await task.save();
 
-    res.status(200).json({ message: "Task status updated", task });
+    res.status(200).json({ message: "Task status updated successfully", task });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to update status", error: error.message });
+    res.status(500).json({ message: "Failed to update task status", error: error.message });
   }
 };

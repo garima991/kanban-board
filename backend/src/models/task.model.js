@@ -16,8 +16,8 @@ const taskSchema = new mongoose.Schema({
     },
     status : {
         type: String,
-        enum : ['Todo', 'On Progress', 'In Review', 'Done'],
-        default : 'Todo',
+        enum : ['To Do', 'On Progress', 'In Review', 'Completed'],
+        // default : 'Todo',
     },
     priority : {
         type: String,
@@ -27,6 +27,7 @@ const taskSchema = new mongoose.Schema({
     },
     tags : [{
         type: String,
+        enum : ["Mobile App", "Dashboard", "Web App"] 
     }],
     description : {
         type: String
