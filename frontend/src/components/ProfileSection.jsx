@@ -17,7 +17,7 @@ const ProfileSection = ({ open }) => {
     try {
       await authApi.logout();
       dispatch(logout()); 
-      navigate("/auth", { replace: true }); 
+      navigate("/auth"); 
     } catch (error) {
       console.error("Logout failed:", error?.response?.data || error.message);
     }

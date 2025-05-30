@@ -1,11 +1,14 @@
 import { createSlice, current } from '@reduxjs/toolkit'
 
-const initialState = { value: [] }
+const initialState = { value: [], isLoading: false }
 
 export const boardSlice = createSlice({
   name: 'kanban',
   initialState,
   reducers: {
+    setBoardsLoading: (state) => {
+      state.isLoading = true;
+    },
     setBoards: (state, action) => {
       state.value = action.payload.map((board, idx) => ({
         ...board,
@@ -22,6 +25,6 @@ export const boardSlice = createSlice({
   }
 })
 
-export const { setBoards, setBoardActive } = boardSlice.actions
+export const { setBoardsLoading, setBoards, setBoardActive } = boardSlice.actions
 
 export default boardSlice.reducer

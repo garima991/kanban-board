@@ -22,8 +22,7 @@ const Header = ({ activeView, setActiveView }) => {
   const [userDropdown, setUserDropdown] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
   const [showUsers, setShowUsers] = useState(false);
-  const inviteRef = useRef(null);
-
+  
   // Fetch all users
   const fetchAllUsers = async () => {
     try {
@@ -69,24 +68,6 @@ const Header = ({ activeView, setActiveView }) => {
     }
   };
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-  const handleClickOutsideInvite = (e) => {
-    if (inviteRef.current && !inviteRef.current.contains(e.target)) {
-      setShowUsers(false);
-    }
-  };
-
-  if (showUsers) {
-    document.addEventListener("mousedown", handleClickOutsideInvite);
-  }
-
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutsideInvite);
-  };
-}, [showUsers]);
-
-
   
   // fetch all board members
   const fetchBoardMembers = async (boardId) => {
@@ -118,42 +99,21 @@ const Header = ({ activeView, setActiveView }) => {
     }
   }, [activeBoard]);
 
+  // // Open search modal
+  // const handleOpenModal = () => {
+  //   setIsSearchModalOpen(true);
+  //   setSearchTerm("");
+  //   setSearchResults([]);
+  // };
+
+  // // Close modal
+  // const handleCloseModal = () => {
+  //   setIsSearchModalOpen(false);
+  //   setSearchTerm("");
+  //   setSearchResults([]);
+  // };
+
   
-
-  // Open search modal
-  const handleOpenModal = () => {
-    setIsSearchModalOpen(true);
-    setSearchTerm("");
-    setSearchResults([]);
-  };
-
-  // Close modal
-  const handleCloseModal = () => {
-    setIsSearchModalOpen(false);
-    setSearchTerm("");
-    setSearchResults([]);
-  };
-
-  // Close search modal on click outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) {
-        handleCloseModal();
-      }
-    };
-    const handleEsc = (e) => e.key === "Escape" && handleCloseModal();
-    if (isSearchModalOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleEsc);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEsc);
-    };
-  }, [isSearchModalOpen, showUsers]);
-
-
   // Debounced search
   const handleSearch = debounce(async (term) => {
     if (!term.trim()) return;
@@ -174,7 +134,7 @@ const Header = ({ activeView, setActiveView }) => {
   }, [searchTerm]);
 
   return (
-    <div className="ml-14 px-3 py-1 flex flex-col gap-1 bg-white text-black border-b-2 border-gray-300">
+    <div className="px-3 py-1 flex flex-col gap-1 bg-white text-black border-b-2 border-gray-300">
       <div className="flex justify-between items-center w-full bg-blue-100 py-3 px-6 mt-2 rounded-md">
         <h1 className="text-4xl font-bold rounded-xl">{boardName}</h1>
         <div className="flex items-center gap-2">
@@ -196,36 +156,44 @@ const Header = ({ activeView, setActiveView }) => {
             <GoPersonAdd /> Invite
           </button>
           {showUsers && (
-            <div
-              ref={inviteRef}
-              className="absolute right-4 top-14 z-50 bg-white border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64"
-            >
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={inviteInput}
-                onChange={(e) => setInviteInput(e.target.value)}
-                className="w-full px-2 py-1 border rounded-md mb-2 outline-none"
-              />
-              {userDropdown.length > 0 ? (
-                <ul className="max-h-40 overflow-y-auto space-y-1">
-                  {userDropdown.map((user) => (
-                    <li
-                      key={user._id}
-                      onClick={() => handleAddBoardMember(user._id)}
-                      className="flex justify-start items-center gap-1 cursor-pointer hover:bg-blue-100 px-2 py-1 rounded"
-                    >
-                      <span className="text-sm text-nowrap">{user.name}</span> -{" "}
-                      <span className="text-gray-500 text-sm truncate">
-                        {user.email}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">No users found.</p>
-              )}
-            </div>
+            <>
+              <div onClick={() => {
+                setShowUsers(false);
+              }} className="fixed inset-0 w-screen h-screen bg-black/10 z-30" />
+             
+                <div
+                  className="absolute right-4 top-14 z-40 bg-white border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64"
+                >
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={inviteInput}
+                    onChange={(e) => setInviteInput(e.target.value)}
+                    className="w-full px-2 py-1 border rounded-md mb-2 outline-none "
+                  />
+                  {userDropdown.length > 0 ? (
+                    <ul className="max-h-40 overflow-y-auto space-y-1">
+                      {userDropdown.map((user) => (
+                        <li
+                          key={user._id}
+                          onClick={() => handleAddBoardMember(user._id)}
+                          className="flex justify-start items-center gap-1 cursor-pointer hover:bg-blue-100 px-2 py-1 rounded"
+                        >
+                          <span className="text-sm text-nowrap">
+                            {user.name}
+                          </span>{" "}
+                          -{" "}
+                          <span className="text-gray-500 text-sm truncate">
+                            {user.email}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500">No users found.</p>
+                  )}
+                </div>
+            </>
           )}
         </div>
       </div>
@@ -261,10 +229,12 @@ const Header = ({ activeView, setActiveView }) => {
               type="search"
               className="no-clear outline-none"
               placeholder="Search..."
-              onClick={handleOpenModal}
+              onClick={() => setIsSearchModalOpen(true)}
             />
             <FaSearch
-              onClick={handleOpenModal}
+              onClick={() => {
+                setIsSearchModalOpen(true);
+              }}
               className="cursor-pointer text-gray-600 hover:text-black transition"
             />
           </div>
@@ -274,9 +244,10 @@ const Header = ({ activeView, setActiveView }) => {
 
           {/* Search Dropdown Modal */}
           {isSearchModalOpen && (
-            <div className="fixed inset-0 bg-slate-500/20 backdrop-blur-sm w-full h-full p-20 z-50">
+            <>
+            <div className="fixed inset-0 bg-slate-500/30 w-full h-full p-20 z-50" onClick={() => setIsSearchModalOpen(false)}/>
               <div
-                ref={modalRef}
+                // ref={modalRef}
                 className="absolute right-[40%] z-50 w-72 max-h-80 overflow-y-auto bg-white border border-gray-300 shadow-md rounded-md p-4"
               >
                 <input
@@ -307,7 +278,7 @@ const Header = ({ activeView, setActiveView }) => {
                   )
                 )}
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>

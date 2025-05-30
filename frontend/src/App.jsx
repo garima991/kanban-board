@@ -16,6 +16,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<AuthForm />} />
+        <Route path = "/unauthorised" />
 
         {/* Admin Routes*/}
         <Route element = {<PrivateRoute allowedRoles = {['admin']}/>}>
@@ -24,7 +25,7 @@ function App() {
         </Route>
 
         <Route element = {<PrivateRoute allowedRoles = {['member']}/>}>
-          <Route path="/user/dashboard" element={<Dashboard />}/>
+          <Route path="/user/dashboard" element={<DashboardLayout />}/>
           {/* <Route path ="/user/task-detail/:taskId" element={<ViewTaskDetail/>} /> */}
         </Route>
 

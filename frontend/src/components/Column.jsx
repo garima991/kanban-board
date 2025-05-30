@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import TaskCard from "./TaskCard";
 import { useTaskModal } from "../contexts/TaskModalContext";
 import { AddTaskModal } from "./AddTaskButton";
 import { FaRegCircle } from "react-icons/fa";
 import TaskDetailView from "./TaskDetailView";
 
-const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTasksUpdate }) => {
+const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTaskAdded }) => {
   const { setTaskFormOpen } = useTaskModal();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
@@ -22,7 +22,7 @@ const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTasksUpdate }) 
       try {
         await onTaskStatusChange(taskId, column.name);
       } catch (error) {
-        console.error("Failed to update task status:", error);
+        console.error(error);
       }
     }
   };
@@ -34,6 +34,7 @@ const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTasksUpdate }) 
     setModalOpen(true);
   };
 
+
   const colorMap = {
     "To Do": "#808080",
     "On Progress": "#0000FF",
@@ -44,7 +45,7 @@ const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTasksUpdate }) 
   const circleColor = colorMap[column.name];
 
   return (
-    <div className="flex flex-col justify-start flex-1 min-w-64 gap-2 h-screen ">
+    <div className="relative flex flex-col justify-start flex-1 min-w-64 gap-2 h-screen ">
       <div className="sticky top-36 flex items-center justify-between gap-2 font-semibold bg-[#F3F5F9] px-4 py-2 rounded-md ">
         <div className="flex items-center gap-2">
           <FaRegCircle color={circleColor} />
@@ -59,9 +60,9 @@ const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTasksUpdate }) 
           +
         </button>
       </div>
-      <AddTaskModal onTaskAdded={onTasksUpdate} />
+      <AddTaskModal onTaskAdded={onTaskAdded} />
       <div
-        className="max-h-[72vh] mt-14 flex flex-col flex-1 gap-3 py-2 px-1 "
+        className="max-h-[72vh] flex flex-col flex-1 gap-3 py-2 px-1 "
         onDrop={handleDrop}
         onDragOver={handleOnDragOver}
       >

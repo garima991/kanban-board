@@ -77,7 +77,7 @@ const NewBoardModal = () => {
         />
       </div>
 
-      <div className="flex flex-col space-y-1">
+       <div className="flex flex-col space-y-1">
         <label className="text-md text-left text-gray-900">Admin</label>
         <input
           className="bg-white px-4 py-2 rounded-md text-sm border-[0.5px] border-gray-600 focus:outline-[#635fc7] outline-1"
@@ -86,7 +86,7 @@ const NewBoardModal = () => {
           onChange={(e) => setAdmin(e.target.value)}
           id="board-admin-input"
         />
-      </div>
+      </div> 
       <button
         className="p-1 bg-blue-900 rounded-lg text-white"
         onClick={handleSubmit}

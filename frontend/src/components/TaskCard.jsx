@@ -26,8 +26,9 @@ const TaskCard = ({ task, colIndex, onTaskClick }) => {
       const memberResponses = await Promise.all(memberPromises);
       const membersDetail = memberResponses.map((res) => res.data);
       setBoardMembers(membersDetail);
-    } catch (e) {
-      toast.error("Failed to fetch board members");
+    } catch (error) {
+      console.log(error)
+      toast.error(error.response.data.message);
     }
   };
 
