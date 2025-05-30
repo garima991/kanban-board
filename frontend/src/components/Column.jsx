@@ -4,27 +4,31 @@ import { useTaskModal } from "../contexts/TaskModalContext";
 import { AddTaskModal } from "./AddTaskButton";
 import { FaRegCircle } from "react-icons/fa";
 import TaskDetailView from "./TaskDetailView";
+import { useDispatch, useSelector } from "react-redux";
+import { updateTaskStatus } from "../redux/features/taskSlice";
 
-const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTaskAdded }) => {
+const Column = ({column}) => {
+  const dispatch = useDispatch();
+  const columnTasks = useSelector((state) => state.task.tasks.filter((task) => task.status === column.name));
+
   const { setTaskFormOpen } = useTaskModal();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
 
-  const columnTasks = useMemo(() => {
-    return tasks.filter((task) => task.status === column.name);
-  }, [tasks, column.name]);
-
+  
   const handleDrop = async (e) => {
     e.preventDefault();
-    const { taskId, prevStatus } = JSON.parse(e.dataTransfer.getData("text"));
+    const {boardId, taskId, prevStatus } = JSON.parse(e.dataTransfer.getData("text"));
     
     if (prevStatus !== column.name) {
       try {
-        await onTaskStatusChange(taskId, column.name);
+        // await onTaskStatusChange(taskId, column.name);
+        dispatch(updateTaskStatus({boardId, taskId, newStatus: column.name }));
       } catch (error) {
         console.error(error);
       }
     }
+    
   };
 
   const handleOnDragOver = (e) => e.preventDefault();
@@ -60,7 +64,7 @@ const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTaskAdded }) =>
           +
         </button>
       </div>
-      <AddTaskModal onTaskAdded={onTaskAdded} />
+      <AddTaskModal />
       <div
         className="max-h-[72vh] flex flex-col flex-1 gap-3 py-2 px-1 "
         onDrop={handleDrop}
@@ -70,7 +74,6 @@ const Column = ({ colIndex, column, tasks, onTaskStatusChange, onTaskAdded }) =>
           <TaskCard
             key={task._id}
             task={task}
-            colIndex={colIndex}
             onTaskClick={handleTaskClick}
           />
         ))}

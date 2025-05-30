@@ -3,8 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import {useDispatch} from 'react-redux';
 import toast from "react-hot-toast";
-import { authApi } from "../apis/axiosInstance";
-import { setUser } from "../redux/features/authSlice";
+import { loginUser, registerUser} from "../redux/features/authSlice";
 
 export default function AuthPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -40,16 +39,13 @@ export default function AuthPage() {
 
       if (isLoggedIn) {
         // Login flow
-        const {data} = await authApi.login({
+
+        const user = dispatch(loginUser({
           email: formData.email,
           password: formData.password,
-        });
-        
-        dispatch(setUser(data.user));
-        console.log(data.user);
-        toast.success('Login Successful !');
-
-        const {role} = data.user;
+        })).unwrap();
+      
+        const role = user.role;
         console.log(role);
         if(role === 'admin'){
           navigate('/admin/dashboard');
@@ -66,16 +62,16 @@ export default function AuthPage() {
         //   return;
         // }
 
-        const { data } = await authApi.register({
+        const user = dispatch(registerUser({
           name: formData.name,
           username: formData.username,
           email: formData.email,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
           role: formData.role,
-        });
+        })).unwrap();
 
-        dispatch(setUser(data.user));
+    
         toast.success('Account Created Successfully !');
         
         // login after registering

@@ -1,9 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { authApi } from "../apis/axiosInstance";
-import { logout } from "../redux/features/authSlice"; 
 import { useNavigate } from "react-router-dom"; 
+import { logoutUser } from "../redux/features/authSlice";
 
 const ProfileSection = ({ open }) => {
   const dispatch = useDispatch();
@@ -14,13 +13,8 @@ const ProfileSection = ({ open }) => {
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
 
   const handleLogout = async () => {
-    try {
-      await authApi.logout();
-      dispatch(logout()); 
-      navigate("/auth"); 
-    } catch (error) {
-      console.error("Logout failed:", error?.response?.data || error.message);
-    }
+    dispatch(logoutUser());
+    navigate("/auth");
   };
 
   return (

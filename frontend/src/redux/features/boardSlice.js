@@ -1,14 +1,37 @@
 import { createSlice, current } from '@reduxjs/toolkit'
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { boardsApi, usersApi } from "../../apis/axiosInstance";
+import { toast } from "react-hot-toast";
 
-const initialState = { value: [], isLoading: false }
+export const fetchBoards = createAsyncThunk("board/fetchBoards", async (_,{ rejectWithValue }) => {
+  try {
+    const res = await boardsApi.getBoards();
+    return res.data.boards;
+  } catch (err) {
+    return rejectWithValue(err.message);
+  }
+});
+
+export const createBoard = createAsyncThunk("board/createBoard", async (boardData, { dispatch, rejectWithValue }) => {
+  try {
+    await boardsApi.createBoard(boardData);
+    dispatch(fetchBoards());
+    toast.success("Board created");
+  } catch (err) {
+    toast.error("Failed to create board");
+    return rejectWithValue(err.message);
+  }
+});
+
 
 export const boardSlice = createSlice({
   name: 'kanban',
-  initialState,
+  initialState : {
+    value : [],
+    isLoading: false
+  },
+
   reducers: {
-    setBoardsLoading: (state) => {
-      state.isLoading = true;
-    },
     setBoards: (state, action) => {
       state.value = action.payload.map((board, idx) => ({
         ...board,
@@ -22,9 +45,37 @@ export const boardSlice = createSlice({
         board.isActive = board.name === boardName;
       })
     }
-  }
+  },
+  extraReducers: (builder) => {
+    builder
+      // fetch Boards
+      .addCase(fetchBoards.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchBoards.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.value = action.payload;
+      })
+      .addCase(fetchBoards.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // create Board
+      .addCase(createBoard.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(createBoard.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(createBoard.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+  },
 })
 
-export const { setBoardsLoading, setBoards, setBoardActive } = boardSlice.actions
+export const { setBoards, setBoardActive } = boardSlice.actions
 
 export default boardSlice.reducer

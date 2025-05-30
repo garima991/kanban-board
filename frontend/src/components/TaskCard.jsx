@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { boardsApi, usersApi } from "../apis/axiosInstance";
 
-const TaskCard = ({ task, colIndex, onTaskClick }) => {
+const TaskCard = ({ task, onTaskClick }) => {
   if (!task) return null;
 
   const handleDrag = (e) => {
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData(
       "text",
-      JSON.stringify({ taskId: task._id, prevStatus: task.status })
+      JSON.stringify({boardId: task.boardId, taskId: task._id, prevStatus: task.status })
     );
   };
   

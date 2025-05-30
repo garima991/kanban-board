@@ -1,11 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import boardSlice from '../redux/features/boardSlice.js';
-import authSlice from '../redux/features/authSlice.js'
+import authSlice from '../redux/features/authSlice.js';
+import taskSlice from '../redux/features/taskSlice.js';
+
 
 const store = configureStore({
     reducer : {
         kanban : boardSlice,
         auth : authSlice,
+        task : taskSlice
     }
 });
 

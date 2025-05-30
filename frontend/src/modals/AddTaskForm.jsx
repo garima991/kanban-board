@@ -54,6 +54,16 @@ const AddTaskForm = () => {
     return true;
   }
 
+  const newTask = {
+    title,
+    description,
+    dueDate,
+    priority,
+    status,
+    tags,
+    color :  'blue-50',
+  }
+
   // const onDeleteSubtask = (id) => {
   //   setSubTasks((prev) => prev.filter((subtask) => subtask.id !== id));
   // };

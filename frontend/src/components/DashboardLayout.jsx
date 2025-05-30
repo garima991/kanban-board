@@ -13,7 +13,7 @@ const DashboardLayout = () => {
       <BoardModalProvider>
         <Sidebar />
       </BoardModalProvider>
-      <div className="overflow-x-auto overflow-y-auto flex-1">
+      <div className="overflow-y-auto flex-1">
         <Dashboard />
       </div>
     </div>

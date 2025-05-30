@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import AddTaskButton from "./AddTaskButton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { TaskModalProvider } from "../contexts/TaskModalContext";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { GoListUnordered, GoPerson, GoPersonAdd } from "react-icons/go";
@@ -9,10 +9,10 @@ import { boardsApi, globalSearchApi, usersApi } from "../apis/axiosInstance";
 import toast from "react-hot-toast";
 
 const Header = ({ activeView, setActiveView }) => {
+  const dispatch = useDispatch();
   const boards = useSelector((state) => state.kanban.value);
   const activeBoard = boards?.find((board) => board.isActive);
   const boardName = activeBoard ? activeBoard.name : " ";
-
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -84,6 +84,7 @@ const Header = ({ activeView, setActiveView }) => {
       toast.error("Failed to fetch board members");
     }
   };
+
 
   // get the initials of the user
   const getInitials = (name) => {

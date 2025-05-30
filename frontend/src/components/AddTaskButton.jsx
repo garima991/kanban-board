@@ -30,7 +30,7 @@ export const AddTaskModal = () => {
           onClick={() => setTaskFormOpen(false)}
           className="bg-slate-500/20 backdrop-blur-sm p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
         >
-         <AddTaskForm />
+         <AddTaskForm/>
         </motion.div>
       )}
     </AnimatePresence>

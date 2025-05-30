@@ -1,14 +1,13 @@
 import './App.css';
 import { BrowserRouter , Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import Layout from './components/DashboardLayout';
+import { Toaster } from 'react-hot-toast'
 import AuthForm from './pages/AuthForm';
 import LandingPage from './pages/LandingPage';
-import Dashboard from './pages/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardLayout from './components/DashboardLayout';
 
 function App() {
+
   return (
     <BrowserRouter>
       <Toaster position="top-right" reverseOrder={false} />
