@@ -9,7 +9,7 @@ import { updateTaskStatus } from "../redux/features/taskSlice";
 
 const Column = ({column}) => {
   const dispatch = useDispatch();
-  const columnTasks = useSelector((state) => state.task.tasks.filter((task) => task.status === column.name));
+ const columnTasks = useSelector((state) => state.task.tasks.filter((task) => task.status === column.name));
 
   const { setTaskFormOpen } = useTaskModal();
   const [modalOpen, setModalOpen] = useState(false);
@@ -22,13 +22,11 @@ const Column = ({column}) => {
     
     if (prevStatus !== column.name) {
       try {
-        // await onTaskStatusChange(taskId, column.name);
         dispatch(updateTaskStatus({boardId, taskId, newStatus: column.name }));
       } catch (error) {
         console.error(error);
       }
     }
-    
   };
 
   const handleOnDragOver = (e) => e.preventDefault();

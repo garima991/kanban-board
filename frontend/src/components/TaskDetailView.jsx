@@ -8,8 +8,12 @@ import {
   FaTags,
 } from "react-icons/fa";
 import { GoPeople } from "react-icons/go";
+import SubtasksSection from './SubtasksSection';
+import { fetchTasks } from "../redux/features/taskSlice";
+import { useDispatch } from "react-redux";
 
-const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
+const TaskDetailView = ({ open, onClose, task}) => {
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("subtasks");
   const [boardMembers, setBoardMembers] = useState([]);
   const [showInvite, setShowInvite] = useState(false);
@@ -17,7 +21,6 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
   const [inviteDropdown, setInviteDropdown] = useState([]);
   const [loadingAssign, setLoadingAssign] = useState(false);
   const [assignees, setAssignees] = useState([]);
-  const inviteRef = useRef(null);
 
   // Fetch board members on open
   const fetchBoardMembers = async (boardId) => {
@@ -56,7 +59,6 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
       const assignedUsers = task.assignedTo
         .map((userId) => boardMembers.find((user) => user._id === userId))
         .filter(Boolean); // remove undefined if no match
-
       setAssignees(assignedUsers);
     } else {
       setAssignees([]);
@@ -74,22 +76,6 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
     }
   }, [inviteInput, boardMembers]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutsideInvite = (e) => {
-      if (inviteRef.current && !inviteRef.current.contains(e.target)) {
-        setShowInvite(false);
-      }
-    };
-
-    if (showInvite) {
-      document.addEventListener("mousedown", handleClickOutsideInvite);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutsideInvite);
-    };
-  }, [showInvite]);
 
   // Assign user to a task
   const handleAssign = async (user) => {
@@ -98,10 +84,10 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
     try {
       await tasksApi.assignTask(task.boardId, task._id, user._id);
       toast.success(`Assigned ${user.name}`);
+      dispatch(fetchTasks(task.boardId));
       setShowInvite(false);
       setInviteInput("");
       setInviteDropdown([]);
-      if (onTaskUpdate) onTaskUpdate(); // Refresh parent task state if provided
     } catch (e) {
       toast.error("Failed to assign user");
     } finally {
@@ -109,11 +95,9 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
     }
   };
 
+ 
   if (!open || !task) return null;
 
-  // Progress for subtasks
-  const completed = task.subtasks?.filter((s) => s.isCompleted).length || 0;
-  const total = task.subtasks?.length || 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
@@ -176,8 +160,10 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
                   Invite
                 </button>
                 {showInvite && (
+                  <>
+                  <div className="fixed inset-0 w-screen h-screen bg-transparent" onClick={() => setShowInvite(false)}/>
                   <div
-                    ref={inviteRef}
+                    // ref={inviteRef}
                     className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-20 w-48 p-2"
                   >
                     <input
@@ -209,6 +195,7 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
                       </div>
                     )}
                   </div>
+                  </>
                 )}
               </div>
             </div>
@@ -248,7 +235,7 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
                 <FaRegFileAlt className="text-gray-500" />
                 Description{" "}
               </h3>
-              <div className="flex rounded p-2 text-gray-900 text-sm border-2 border-gray-200">
+              <div className="flex rounded p-3 text-gray-900 text-sm border-2 border-gray-200">
                 {task.description || "No description provided."}
               </div>
             </div>
@@ -278,33 +265,9 @@ const TaskDetailView = ({ open, onClose, task, onTaskUpdate }) => {
           </button>
         </div>
         {/* Tab content */}
-        <div className="p-6 pb-16">
+        <div className="p-6 pb-16 max-h-[60vh] overflow-y-auto">
           {activeTab === "subtasks" && (
-            <>
-              <div className="mb-3">
-                {completed} / {total} subtasks completed
-              </div>
-              {task.subtasks?.length > 0 ? (
-                task.subtasks.map((subtask, i) => (
-                  <div
-                    key={i}
-                    className={`flex gap-4 items-center text-sm text-gray-900 ${
-                      subtask.isCompleted ? "line-through" : ""
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={subtask.isCompleted}
-                      readOnly
-                      className="cursor-pointer"
-                    />
-                    <span>{subtask.title}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm text-gray-400">No subtasks added.</div>
-              )}
-            </>
+            <SubtasksSection task={task} />
           )}
           {activeTab === "comments" && (
             <div className="text-sm text-gray-500">

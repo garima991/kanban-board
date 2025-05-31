@@ -1,5 +1,5 @@
 
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, createSelector } from "@reduxjs/toolkit";
 import { tasksApi } from "../../apis/axiosInstance";
 import { toast } from "react-hot-toast";
 
@@ -44,15 +44,27 @@ export const updateTaskStatus = createAsyncThunk(
   }
 );
 
+export const addSubtask = createAsyncThunk(
+  "task/addSubtask",
+  async ({ boardId, taskId, subtaskData }, { dispatch, rejectWithValue }) => {
+    try {
+      await tasksApi.addSubtask(boardId, taskId, subtaskData);
+      return res.data.task.subtasks;
+    }
+    catch(error){
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  });
 
 
 // Slice
 
 const taskSlice = createSlice({
-  name: "tasks",
+  name: "task",
   initialState: {
     tasks: [],
     isTaskLoading: false,
+    currentTask: null,
     error: null,
   },
   reducers: {},
@@ -101,9 +113,25 @@ const taskSlice = createSlice({
         state.isTaskLoading = false;
         state.error = action.payload;
         toast.error(`Failed to update task status: ${action.payload}`);
-      });
+      })
+
+      //add subtask 
+      .addCase(addSubtask.pending, (state) => {
+        state.isTaskLoading = true;
+        state.error = null;
+      })
+      .addCase(addSubtask.fulfilled, (state, action) => {
+        state.isTaskLoading = false;
+        toast.success("Subtask added successfully");
+      })
+      .addCase(addSubtask.rejected, (state, action) => {
+        state.isTaskLoading = false;
+        state.error = action.payload;
+        toast.error("Failed to add subtask");
+      })
 
   },
 });
+
 
 export default taskSlice.reducer;

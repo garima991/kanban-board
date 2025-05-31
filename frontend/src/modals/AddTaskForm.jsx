@@ -6,6 +6,7 @@ import { addTask } from "../redux/features/boardSliceOld.js";
 import { useState } from "react";
 import { tasksApi } from "../apis/axiosInstance.js";
 import toast from "react-hot-toast";
+import { fetchTasks } from "../redux/features/taskSlice.js";
 
 const AddTaskForm = () => {
   const { setTaskFormOpen } = useTaskModal();
@@ -21,11 +22,7 @@ const AddTaskForm = () => {
   const [priority, setPriority] = useState("Medium");
   const [tags, setTags] = useState("Web App"); // custom tags
   const [description, setDescription] = useState("");
-  // const [subTasks, setSubTasks] = useState([
-  //   { title: "", isComplete: false, id: uuidv4() },
-  // ]);
-  // const [comments, setComments] = useState([""]);
- const validStatus = ["To Do", "On Progress", "In Review", "Completed"];
+  const validStatus = ["To Do", "On Progress", "In Review", "Completed"];
   const validPriorities = ["Low", "Medium", "High"];
   const validTags = ["Mobile App","Dashboard", "Web App"];
 
@@ -64,14 +61,6 @@ const AddTaskForm = () => {
     color :  'blue-50',
   }
 
-  // const onDeleteSubtask = (id) => {
-  //   setSubTasks((prev) => prev.filter((subtask) => subtask.id !== id));
-  // };
-
-  // const onDeleteComment = (index) => {
-  //   setComments((prevComment) => prevComment.filter((_, i) => i !== index));
-  // };
-
   const handleSubmit = async () => {
     const isValid = validateForm();
     if (!isValid) return;
@@ -84,15 +73,10 @@ const AddTaskForm = () => {
       status,
       tags,
       color :  'blue-50',
-      // subTasks : subTasks.map(subtask => ({
-      //   title : subtask.title,
-      //   isComplete : subtask.isComplete,
-      // })),
-      // comments : comments.map(comment => ({
-      //   comment : comment,
-      // })),
+
       })
       toast.success("Task Created Successfully !");
+      dispatch(fetchTasks(boardId))
     }
     catch(error){
       console.log("Error while creating task !", error);
@@ -183,150 +167,6 @@ const AddTaskForm = () => {
           onChange={(e) => setDescription(e.target.value)}
           className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
         />
-
-        {/* Subtasks */}
-        {/* <div className="flex flex-col items-center gap-1 w-full">
-          <div className="flex gap-2">
-            <h4 className="text-black font-normal text-base">
-              Subtasks
-              <button
-                className="text-black font-semibold text-xl px-1"
-                onClick={() => {
-                  setSubTasks((state) => [
-                    ...state,
-                    { title: "", isCompleted: false, id: uuidv4() },
-                  ]);
-                }}
-              >
-                +
-              </button>
-            </h4>
-          </div>
-          {subTasks.map((subtask, index) => (
-            <div
-              key={index}
-              className="flex justify-center items-center gap-1 w-5/6"
-            >
-              <input
-                key={subtask.id}
-                type="text"
-                placeholder={`Subtask ${index + 1}`}
-                value={subtask.title}
-                onChange={(e) => {
-                  const newSubTasks = [...subTasks];
-                  newSubTasks[index].title = e.target.value;
-                  setSubTasks(newSubTasks);
-                }}
-                className="w-full p-2 border-2 border-gray-400 rounded-lg text-black"
-              />
-              <button
-                onClick={() => onDeleteSubtask(subtask.id)}
-                className="cursor-pointer"
-              >
-                <svg
-                  width="34px"
-                  height="34px"
-                  viewBox="0 0 30 30"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
-                    <path
-                      d="M8.46445 15.5354L15.5355 8.46436"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                    ></path>{" "}
-                    <path
-                      d="M8.46446 8.46458L15.5355 15.5356"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                    ></path>{" "}
-                  </g>
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div> */}
-
-        {/* comments */}
-{/* 
-        <div className="flex flex-col items-center gap-1 w-full">
-          <div className="flex gap-2">
-            <h4 className="text-black font-normal text-base">
-              Comments
-              <button
-                className="text-black font-semibold text-xl px-1"
-                onClick={() => {
-                  setComments((state) => [...state, ""]);
-                }}
-              >
-                +
-              </button>
-            </h4>
-          </div>
-          {comments.map((comment, index) => (
-            <div
-              key={index}
-              className="flex justify-center items-center gap-1 w-5/6"
-            >
-              <input
-                key={index}
-                type="text"
-                placeholder={`Comment ${index + 1}`}
-                value={comment}
-                onChange={(e) => {
-                  const newCommentArray = [...comments];
-                  newCommentArray[index] = e.target.value;
-                  setComments(newCommentArray);
-                }}
-                className="w-full p-2 border-2 border-gray-400 rounded-lg text-black"
-              />
-              <button
-                onClick={() => onDeleteComment(index)}
-                className="cursor-pointer"
-              >
-                <svg
-                  width="34px"
-                  height="34px"
-                  viewBox="0 0 30 30"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
-                    <path
-                      d="M8.46445 15.5354L15.5355 8.46436"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                    ></path>{" "}
-                    <path
-                      d="M8.46446 8.46458L15.5355 15.5356"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                    ></path>{" "}
-                  </g>
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div> */}
 
         {/* Submit Button */}
         <button

@@ -25,7 +25,7 @@ const Kanban = () => {
     if (boardId) {
       dispatch(fetchTasks(boardId));
     }
-  }, [dispatch, boardId]);
+  }, [dispatch, boardId, board]);
 
 
   if (isBoardLoading || isTaskLoading) {
