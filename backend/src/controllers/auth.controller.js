@@ -50,8 +50,8 @@ export const registerUser = async (req, res) => {
 
     res
       .status(201)
-      .cookie("accessToken", accessToken, { httpOnly: true })
-      .cookie("refreshToken", refreshToken, { httpOnly: true })
+      .cookie("accessToken", accessToken, { httpOnly: true, sameSite : "none", secure: true })
+      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite : "none", secure: true })
       .json({message: 'User registered successfully !', user: cleanUser, accessToken, refreshToken });
   }
    catch (error) {
@@ -135,8 +135,8 @@ export const refreshAccessToken = async (req, res) => {
     const { accessToken, refreshToken } = await generateTokens(user);
 
     res
-      .cookie("accessToken", accessToken, { httpOnly: true })
-      .cookie("refreshToken", refreshToken, { httpOnly: true })
+      .cookie("accessToken", accessToken, { httpOnly: true, sameSite : "none", secure: true})
+      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite : "none", secure: true })
       .json({ accessToken, refreshToken });
   } catch (error) {
     res.status(500).json({ message: "Failed to refresh token" , error: error.message});
