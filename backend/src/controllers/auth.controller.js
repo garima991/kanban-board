@@ -90,8 +90,8 @@ export const loginUser = async (req, res) => {
 
     res
       .status(200)
-      .cookie("accessToken", accessToken, { httpOnly: true, sameSite: 'Strict'})
-      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: 'Strict' })
+      .cookie("accessToken", accessToken, { httpOnly: true })
+      .cookie("refreshToken", refreshToken, { httpOnly: true  })
       .json({message: 'User logged in successfully', user: cleanUser, accessToken, refreshToken });
   } catch (error) {
     res.status(500).json({ message: "Login failed" , error: error.message});
