@@ -7,6 +7,7 @@ export const verifyJWT = async (req, res, next) => {
   try {
     // Get token from cookie or header
     const tokenFromCookie = req.cookies?.accessToken;
+    console.log(tokenFromCookie);
     const headerBearerToken = req.headers.authorization ?? "";
     const tokenFromHeader = headerBearerToken?.split("Bearer ")[1] ?? "";
     const token = tokenFromCookie || tokenFromHeader;
