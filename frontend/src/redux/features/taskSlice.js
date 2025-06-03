@@ -1,6 +1,6 @@
 
 import { createSlice, createAsyncThunk, createSelector } from "@reduxjs/toolkit";
-import { tasksApi } from "../../apis/axiosInstance";
+import { boardsApi, tasksApi } from "../../apis/axiosInstance";
 import { toast } from "react-hot-toast";
 
 // Async Thunks
@@ -46,15 +46,53 @@ export const updateTaskStatus = createAsyncThunk(
 
 export const addSubtask = createAsyncThunk(
   "task/addSubtask",
-  async ({ boardId, taskId, subtaskData }, { dispatch, rejectWithValue }) => {
+  async ({ boardId, taskId, title }, { dispatch, rejectWithValue }) => {
     try {
-      await tasksApi.addSubtask(boardId, taskId, subtaskData);
+      const res = await tasksApi.addSubtask(boardId, taskId, { title });
+      dispatch(fetchTasks(boardId));
       return res.data.task.subtasks;
     }
-    catch(error){
+    catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   });
+
+export const updateSubtask = createAsyncThunk(
+  "task/updateSubtask",
+  async ({ boardId, taskId, subtaskId, subtaskData }, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await tasksApi.updateSubtask(boardId, taskId, subtaskId, subtaskData);
+      dispatch(fetchTasks(boardId));
+      return res.data.task.subtasks;
+    }
+    catch {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  });
+
+  export const deleteSubtask = createAsyncThunk(
+    "task/deleteSubtask",
+    async ({ boardId, taskId, subtaskId }, { dispatch, rejectWithValue }) => {
+      try {
+        const res = await tasksApi.deleteSubtask(boardId, taskId, subtaskId);
+        dispatch(fetchTasks(boardId));
+          return res.data.task.subtasks;
+    }
+    catch {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  });
+
+
+
+
+export const updateTask = createAsyncThunk(
+  "task/updateTask",
+  async ({ boardId, taskId, taskData }, { dispatch, rejectWithValue }) => {
+    await tasksApi.updateTask(boardId, taskId, taskData);
+    dispatch(fetchTasks(boardId));
+  }
+)
 
 
 // Slice
@@ -129,6 +167,51 @@ const taskSlice = createSlice({
         state.error = action.payload;
         toast.error("Failed to add subtask");
       })
+
+      // update subtask
+      .addCase(updateSubtask.pending, (state) => {
+        state.isTaskLoading = true;
+        state.error = null;
+      })
+      .addCase(updateSubtask.fulfilled, (state, action) => {
+        state.isTaskLoading = false;
+        toast.success("Subtask updated successfully");
+      })
+      .addCase(updateSubtask.rejected, (state, action) => {
+        state.isTaskLoading = false;
+        state.error = action.payload;
+        toast.error("Failed to update subtask");
+      })
+
+      // delete subtask
+      .addCase(deleteSubtask.pending, (state) => {
+        state.isTaskLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteSubtask.fulfilled, (state, action) => {
+        state.isTaskLoading = false;
+        toast.success("Subtask Deleted successfully");
+      })
+      .addCase(deleteSubtask.rejected, (state, action) => {
+        state.isTaskLoading = false;
+        state.error = action.payload;
+        toast.error("Failed to delete subtask");
+      })
+
+
+      // update task
+      .addCase(updateTask.pending, (state) => {
+        state.isTaskLoading = true;
+        state.error = null;
+      })
+      .addCase(updateTask.fulfilled, (state, action) => {
+        state.isTaskLoading = false;
+        toast.success("Task updated successfully");
+      })
+      .addCase(updateTask.rejected, (state, action) => {
+        state.error = action.payload;
+        toast.error("Failed to update task", error);
+      });
 
   },
 });

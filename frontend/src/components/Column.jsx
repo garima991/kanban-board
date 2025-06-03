@@ -16,13 +16,13 @@ const Column = ({column}) => {
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
 
   
-  const handleDrop = async (e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     const {boardId, taskId, prevStatus } = JSON.parse(e.dataTransfer.getData("text"));
     
     if (prevStatus !== column.name) {
       try {
-        dispatch(updateTaskStatus({boardId, taskId, newStatus: column.name }));
+       dispatch(updateTaskStatus({boardId, taskId, newStatus: column.name }));
       } catch (error) {
         console.error(error);
       }

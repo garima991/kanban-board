@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { boardsApi, usersApi } from "../apis/axiosInstance";
+import { TbSubtask } from "react-icons/tb";
+import { BsThreeDots } from "react-icons/bs";
 
 const TaskCard = ({ task, onTaskClick }) => {
   if (!task) return null;
@@ -66,7 +68,7 @@ const TaskCard = ({ task, onTaskClick }) => {
       draggable
       onDragStart={handleDrag}
       onClick={() => onTaskClick(task._id)}
-    >
+    >   
       <div className="flex gap-2">
         {task?.tags && (
           <span className="px-2 py-1 text-xs bg-gray-100 text-gray-500 border rounded">{task?.tags}</span>
@@ -92,8 +94,8 @@ const TaskCard = ({ task, onTaskClick }) => {
                   </span>
                 ))}
               </div>
-        <span>
-          {task.subtasks?.length > 0 && <>📎 {task.subtasks.length} </>}
+        <span className="flex gap-1">
+          {task.subtasks?.length > 0 && <span className="flex gap-1"> <TbSubtask/>{task.subtasks.length} </span>}
           💬 {task.comments?.length || 0}
         </span>
       </div>
