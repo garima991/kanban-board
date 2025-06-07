@@ -22,6 +22,7 @@ const Header = ({ activeView, setActiveView }) => {
   const [userDropdown, setUserDropdown] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
   const [showUsers, setShowUsers] = useState(false);
+  const user = useSelector((state) => state.auth.user);
   
   // Fetch all users
   const fetchAllUsers = async () => {
@@ -150,12 +151,14 @@ const Header = ({ activeView, setActiveView }) => {
               </span>
             ))}
           </div>
+          {user.role === "admin" && (
           <button
             className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200"
             onClick={() => setShowUsers(!showUsers)}
           >
             <GoPersonAdd /> Invite
           </button>
+          )}
           {showUsers && (
             <>
               <div onClick={() => {

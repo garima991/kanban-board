@@ -27,7 +27,7 @@ export const registerUser = createAsyncThunk(
       toast.success("Registration successful");
       return response.data;
     } catch (err) {
-      const message = err?.response?.data?.message || "Registration failed";  
+      const message = err?.response?.data?.message || "Registration failed";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -54,9 +54,22 @@ export const refreshUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await authApi.refreshToken();
+      console.log("refreshUser response", res);
       return res.data.user;
     } catch (err) {
       return rejectWithValue(err?.response?.data?.message || "Refresh failed");
+    }
+  }
+);
+
+export const getMe = createAsyncThunk(
+  "auth/getMe",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await authApi.getMe();
+      return res.data.user;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data?.message || "Fetch user failed");
     }
   }
 );
@@ -75,7 +88,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-   
+
   },
   extraReducers: (builder) => {
     builder
@@ -93,7 +106,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-       // Handle register thunk
+      // Handle register thunk
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -131,7 +144,21 @@ const authSlice = createSlice({
       .addCase(refreshUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+      })
+
+      // GetMe
+      .addCase(getMe.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getMe.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(getMe.rejected, (state, action) => {
+        state.isLoading = false;
+        state.user = null; // in case token expired
+        state.error = action.payload;
+      })
   },
 });
 

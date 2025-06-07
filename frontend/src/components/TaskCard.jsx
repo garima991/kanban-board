@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { boardsApi, usersApi } from "../apis/axiosInstance";
 import { TbSubtask } from "react-icons/tb";
-import { BsThreeDots } from "react-icons/bs";
 
 const TaskCard = ({ task, onTaskClick }) => {
   if (!task) return null;

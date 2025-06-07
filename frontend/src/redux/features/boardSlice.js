@@ -14,11 +14,9 @@ export const fetchBoards = createAsyncThunk("board/fetchBoards", async (_,{ reje
 
 export const createBoard = createAsyncThunk("board/createBoard", async (boardData, { dispatch, rejectWithValue }) => {
   try {
-    await boardsApi.createBoard(boardData);
-    dispatch(fetchBoards());
-    toast.success("Board created");
+    const res = await boardsApi.createBoard(boardData);
+    return res.data.board;
   } catch (err) {
-    toast.error("Failed to create board");
     return rejectWithValue(err.message);
   }
 });
@@ -67,10 +65,13 @@ export const boardSlice = createSlice({
       })
       .addCase(createBoard.fulfilled, (state) => {
         state.isLoading = false;
+        state.value.push(action.payload);
+        toast.success("Board created successfully !")
       })
       .addCase(createBoard.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        toast.error(`Failed to create baord: ${action.payload}`)
       })
 
   },

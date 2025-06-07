@@ -21,9 +21,8 @@ export const createTask = createAsyncThunk(
   "task/createTask",
   async ({ boardId, taskData }, { dispatch, rejectWithValue }) => {
     try {
-      await tasksApi.createTask(boardId, taskData);
-      // Refetch tasks after successful creation
-      dispatch(fetchTasks(boardId));
+      const res = await tasksApi.createTask(boardId, taskData);
+      return res.data.task;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
@@ -35,8 +34,6 @@ export const updateTaskStatus = createAsyncThunk(
   async ({ boardId, taskId, newStatus }, { dispatch, rejectWithValue }) => {
     try {
       const res = await tasksApi.changeTaskStatus(boardId, taskId, newStatus);
-      // Refetch tasks to ensure consistency
-      dispatch(fetchTasks(boardId));
       return res.data.task;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -50,7 +47,7 @@ export const addSubtask = createAsyncThunk(
     try {
       const res = await tasksApi.addSubtask(boardId, taskId, { title });
       dispatch(fetchTasks(boardId));
-      return res.data.task.subtasks;
+      return res.data.task;
     }
     catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -62,37 +59,38 @@ export const updateSubtask = createAsyncThunk(
   async ({ boardId, taskId, subtaskId, subtaskData }, { dispatch, rejectWithValue }) => {
     try {
       const res = await tasksApi.updateSubtask(boardId, taskId, subtaskId, subtaskData);
-      dispatch(fetchTasks(boardId));
-      return res.data.task.subtasks;
+      return res.data.task;
     }
     catch {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   });
 
-  export const deleteSubtask = createAsyncThunk(
-    "task/deleteSubtask",
-    async ({ boardId, taskId, subtaskId }, { dispatch, rejectWithValue }) => {
-      try {
-        const res = await tasksApi.deleteSubtask(boardId, taskId, subtaskId);
-        dispatch(fetchTasks(boardId));
-          return res.data.task.subtasks;
+export const deleteSubtask = createAsyncThunk(
+  "task/deleteSubtask",
+  async ({ boardId, taskId, subtaskId }, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await tasksApi.deleteSubtask(boardId, taskId, subtaskId);
+      return res.data.task;
     }
     catch {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   });
-
-
 
 
 export const updateTask = createAsyncThunk(
   "task/updateTask",
   async ({ boardId, taskId, taskData }, { dispatch, rejectWithValue }) => {
-    await tasksApi.updateTask(boardId, taskId, taskData);
-    dispatch(fetchTasks(boardId));
-  }
-)
+    try{
+      const res = await tasksApi.updateTask(boardId, taskId, taskData);
+      return res.data.task;
+    }
+    catch{
+      rejectWithValue(error.response?.data?.message || error.message);
+    }
+
+})
 
 
 // Slice
@@ -130,6 +128,7 @@ const taskSlice = createSlice({
       })
       .addCase(createTask.fulfilled, (state, action) => {
         state.isTaskLoading = false;
+        state.tasks.push(action.payload);
         toast.success("Task created successfully");
       })
       .addCase(createTask.rejected, (state, action) => {
@@ -145,6 +144,11 @@ const taskSlice = createSlice({
       })
       .addCase(updateTaskStatus.fulfilled, (state, action) => {
         state.isTaskLoading = false;
+        const updated = action.payload;
+        const index = state.tasks.findIndex(task => task._id === updated._id);
+        if (index !== -1) {
+          state.tasks[index] = updated;
+        }
         toast.success("Task status updated");
       })
       .addCase(updateTaskStatus.rejected, (state, action) => {
@@ -160,6 +164,11 @@ const taskSlice = createSlice({
       })
       .addCase(addSubtask.fulfilled, (state, action) => {
         state.isTaskLoading = false;
+        const updated = action.payload;
+        const index = state.tasks.findIndex(task => task._id === updated._id);
+        if (index !== -1) {
+          state.tasks[index] = updated;
+        }
         toast.success("Subtask added successfully");
       })
       .addCase(addSubtask.rejected, (state, action) => {
@@ -175,6 +184,11 @@ const taskSlice = createSlice({
       })
       .addCase(updateSubtask.fulfilled, (state, action) => {
         state.isTaskLoading = false;
+        const updated = action.payload;
+        const index = state.tasks.findIndex(task => task._id === updated._id);
+        if (index !== -1) {
+          state.tasks[index] = updated;
+        }
         toast.success("Subtask updated successfully");
       })
       .addCase(updateSubtask.rejected, (state, action) => {
@@ -190,6 +204,11 @@ const taskSlice = createSlice({
       })
       .addCase(deleteSubtask.fulfilled, (state, action) => {
         state.isTaskLoading = false;
+        const updated = action.payload;
+        const index = state.tasks.findIndex(task => task._id === updated._id);
+        if (index !== -1) {
+          state.tasks[index] = updated;
+        }
         toast.success("Subtask Deleted successfully");
       })
       .addCase(deleteSubtask.rejected, (state, action) => {
@@ -206,6 +225,11 @@ const taskSlice = createSlice({
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         state.isTaskLoading = false;
+        const updated = action.payload;
+        const index = state.tasks.findIndex(task => task._id === updated._id);
+        if (index !== -1) {
+          state.tasks[index] = updated;
+        }
         toast.success("Task updated successfully");
       })
       .addCase(updateTask.rejected, (state, action) => {

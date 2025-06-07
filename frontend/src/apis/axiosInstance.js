@@ -82,7 +82,7 @@ export const tasksApi = {
 export const authApi = {
     login: (userData) => axiosInstance.post('auth/login', userData),
     register: (userData) => axiosInstance.post('auth/register', userData),
-    refreshToken: () => axiosInstance.post('auth/refresh', {withCredentials: true}),
+    refreshToken: () => axiosInstance.get('auth/refresh'),
     logout: () => axiosInstance.post('auth/logout'),
     updateAccountDetails: (userData) => axiosInstance.patch('auth/update', userData),
     changePassword: (userData) => axiosInstance.patch('/auth/change-password', userData),
@@ -94,7 +94,9 @@ export const usersApi = {
     getUserById: (userId) => axiosInstance.get(`users/${userId}`),
     searchUsers: (searchTerm) => axiosInstance.get(`users/search?q=${searchTerm}`),
     updateUserRole: (userId, roleData) => axiosInstance.patch(`users/${userId}/role`, roleData),
+    getMe: () => axiosInstance.get('users/me')
 };
+
 
 export const globalSearchApi = {
     globalSearch: (searchTerm) => axiosInstance.get(`search?q=${searchTerm}`),
