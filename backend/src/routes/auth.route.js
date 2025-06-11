@@ -16,7 +16,7 @@ app.post('/register', registerUser);
             
 app.post('/login', loginUser);       
            
-app.post('/refresh', refreshAccessToken);    
+app.get('/refresh', refreshAccessToken);    
    
 app.post('/logout', verifyJWT, logoutUser);  
                 

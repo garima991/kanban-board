@@ -92,3 +92,18 @@ export const updateUserRole = async (req, res) => {
         res.status(500).json({ message: 'Failed to update role', error: error.message });
     }
 };
+
+
+/**
+* @desc current user details
+* @route GET /api/v1/users/me
+*/
+
+
+export const getMe = async (req, res) => {
+        try {
+            res.status(200).json({ user : req.user });
+        } catch (error) {
+            res.status(500).json({ message: "Server Error", error: error.message });
+        }
+};
