@@ -3,27 +3,32 @@ import AddTaskButton from "./AddTaskButton";
 import { useDispatch, useSelector } from "react-redux";
 import { TaskModalProvider } from "../contexts/TaskModalContext";
 import { LuLayoutDashboard } from "react-icons/lu";
-import { GoListUnordered, GoPerson, GoPersonAdd } from "react-icons/go";
+import { GoListUnordered, GoPersonAdd } from "react-icons/go";
 import { FaSearch } from "react-icons/fa";
 import { boardsApi, globalSearchApi, usersApi } from "../apis/axiosInstance";
 import toast from "react-hot-toast";
+import {
+  addBoardMember,
+  getActiveBoardMembers,
+} from "../redux/features/boardSlice";
 
 const Header = ({ activeView, setActiveView }) => {
   const dispatch = useDispatch();
   const boards = useSelector((state) => state.kanban.value);
   const activeBoard = boards?.find((board) => board.isActive);
+  const boardMembers = useSelector((state) => state.kanban.activeBoardMembers);
+  const user = useSelector((state) => state.auth.user);
+
   const boardName = activeBoard ? activeBoard.name : " ";
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const modalRef = useRef(null);
-  const [boardMembers, setBoardMembers] = useState([]);
   const [allUsers, setAllUsers] = useState([]); // Store all users initially
   const [userDropdown, setUserDropdown] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
   const [showUsers, setShowUsers] = useState(false);
-  const user = useSelector((state) => state.auth.user);
-  
+
   // Fetch all users
   const fetchAllUsers = async () => {
     try {
@@ -34,9 +39,17 @@ const Header = ({ activeView, setActiveView }) => {
     }
   };
 
+  // fetch users when component mounts
   useEffect(() => {
     fetchAllUsers();
-  }, []); // fetch users when component mounts
+  }, []);
+
+  // fetch board members
+  useEffect(() => {
+    if (activeBoard?._id) {
+      dispatch(getActiveBoardMembers(activeBoard._id));
+    }
+  }, [activeBoard, dispatch]);
 
   // Filter users based on inviteInput
   useEffect(() => {
@@ -58,34 +71,15 @@ const Header = ({ activeView, setActiveView }) => {
 
   const handleAddBoardMember = async (userId) => {
     if (!activeBoard) return;
-    try {
-      await boardsApi.addMember(activeBoard._id, { userId });
-      toast.success("User added to the board!");
-      setInviteInput("");
-      fetchBoardMembers(activeBoard._id); // Refresh the member list
-    } catch (err) {
-      toast.error("Failed to add user to the board");
-      console.error(err);
-    }
+    dispatch(
+      addBoardMember({
+        boardId: activeBoard._id,
+        memberData: { userId, role: "member" },
+      })
+    );
+    setInviteInput("");
+    setShowUsers(false);
   };
-
-  
-  // fetch all board members
-  const fetchBoardMembers = async (boardId) => {
-    try {
-      const response = await boardsApi.getBoardById(boardId);
-      const memberIds = response.data.board.members;
-      const memberPromises = memberIds.map((id) =>
-        usersApi.getUserById(id.user)
-      );
-      const memberResponses = await Promise.all(memberPromises);
-      const membersDetail = memberResponses.map((res) => res.data);
-      setBoardMembers(membersDetail);
-    } catch (e) {
-      toast.error("Failed to fetch board members");
-    }
-  };
-
 
   // get the initials of the user
   const getInitials = (name) => {
@@ -94,12 +88,6 @@ const Header = ({ activeView, setActiveView }) => {
     if (names.length === 1) return names[0][0].toUpperCase();
     return (names[0][0] + names[names.length - 1][0]).toUpperCase();
   };
-
-  useEffect(() => {
-    if (activeBoard) {
-      fetchBoardMembers(activeBoard._id);
-    }
-  }, [activeBoard]);
 
   // // Open search modal
   // const handleOpenModal = () => {
@@ -115,7 +103,6 @@ const Header = ({ activeView, setActiveView }) => {
   //   setSearchResults([]);
   // };
 
-  
   // Debounced search
   const handleSearch = debounce(async (term) => {
     if (!term.trim()) return;
@@ -152,51 +139,50 @@ const Header = ({ activeView, setActiveView }) => {
             ))}
           </div>
           {user.role === "admin" && (
-          <button
-            className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200"
-            onClick={() => setShowUsers(!showUsers)}
-          >
-            <GoPersonAdd /> Invite
-          </button>
+            <button
+              className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200"
+              onClick={() => setShowUsers(!showUsers)}
+            >
+              <GoPersonAdd /> Invite
+            </button>
           )}
           {showUsers && (
             <>
-              <div onClick={() => {
-                setShowUsers(false);
-              }} className="fixed inset-0 w-screen h-screen bg-black/10 z-30" />
-             
-                <div
-                  className="absolute right-4 top-14 z-40 bg-white border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64"
-                >
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={inviteInput}
-                    onChange={(e) => setInviteInput(e.target.value)}
-                    className="w-full px-2 py-1 border rounded-md mb-2 outline-none "
-                  />
-                  {userDropdown.length > 0 ? (
-                    <ul className="max-h-40 overflow-y-auto space-y-1">
-                      {userDropdown.map((user) => (
-                        <li
-                          key={user._id}
-                          onClick={() => handleAddBoardMember(user._id)}
-                          className="flex justify-start items-center gap-1 cursor-pointer hover:bg-blue-100 px-2 py-1 rounded"
-                        >
-                          <span className="text-sm text-nowrap">
-                            {user.name}
-                          </span>{" "}
-                          -{" "}
-                          <span className="text-gray-500 text-sm truncate">
-                            {user.email}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500">No users found.</p>
-                  )}
-                </div>
+              <div
+                onClick={() => {
+                  setShowUsers(false);
+                }}
+                className="fixed inset-0 w-screen h-screen bg-black/10 z-30"
+              />
+
+              <div className="absolute right-4 top-14 z-40 bg-white border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64">
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={inviteInput}
+                  onChange={(e) => setInviteInput(e.target.value)}
+                  className="w-full px-2 py-1 border rounded-md mb-2 outline-none "
+                />
+                {userDropdown.length > 0 ? (
+                  <ul className="max-h-40 overflow-y-auto space-y-1">
+                    {userDropdown.map((user) => (
+                      <li
+                        key={user._id}
+                        onClick={() => handleAddBoardMember(user._id)}
+                        className="flex justify-start items-center gap-1 cursor-pointer hover:bg-blue-100 px-2 py-1 rounded"
+                      >
+                        <span className="text-sm text-nowrap">{user.name}</span>{" "}
+                        -{" "}
+                        <span className="text-gray-500 text-sm truncate">
+                          {user.email}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500">No users found.</p>
+                )}
+              </div>
             </>
           )}
         </div>
@@ -249,7 +235,10 @@ const Header = ({ activeView, setActiveView }) => {
           {/* Search Dropdown Modal */}
           {isSearchModalOpen && (
             <>
-            <div className="fixed inset-0 bg-slate-500/30 w-full h-full p-20 z-50" onClick={() => setIsSearchModalOpen(false)}/>
+              <div
+                className="fixed inset-0 bg-slate-500/30 w-full h-full p-20 z-50"
+                onClick={() => setIsSearchModalOpen(false)}
+              />
               <div
                 // ref={modalRef}
                 className="absolute right-[40%] z-50 w-72 max-h-80 overflow-y-auto bg-white border border-gray-300 shadow-md rounded-md p-4"

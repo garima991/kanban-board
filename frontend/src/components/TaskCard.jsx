@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { boardsApi, usersApi } from "../apis/axiosInstance";
 import { TbSubtask } from "react-icons/tb";
+import { getActiveBoardMembers } from "../redux/features/boardSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const TaskCard = ({ task, onTaskClick }) => {
   if (!task) return null;
@@ -13,33 +14,8 @@ const TaskCard = ({ task, onTaskClick }) => {
     );
   };
   
-  const [boardMembers, setBoardMembers] = useState([]);
+ const boardMembers = useSelector((state) => state.kanban.activeBoardMembers);
  const [assignees, setAssignees] = useState([]);
-
-  // Fetch board members on open
-  const fetchBoardMembers = async (boardId) => {
-    try {
-      const response = await boardsApi.getBoardById(boardId);
-      const memberIds = response.data.board.members;
-      const memberPromises = memberIds.map((id) =>
-        usersApi.getUserById(id.user)
-      );
-      const memberResponses = await Promise.all(memberPromises);
-      const membersDetail = memberResponses.map((res) => res.data);
-      setBoardMembers(membersDetail);
-    } catch (error) {
-      console.log(error)
-      toast.error(error.response.data.message);
-    }
-  };
-
-  useEffect(() => {
-    if (task?.boardId) {
-      fetchBoardMembers(task.boardId);
-    } else {
-      setBoardMembers([]);
-    }
-  }, [task]);
 
    const getInitials = (name) => {
       if (!name) return "";

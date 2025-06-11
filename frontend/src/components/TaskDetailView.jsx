@@ -10,41 +10,19 @@ import {
 import { GoPeople } from "react-icons/go";
 import SubtasksSection from './SubtasksSection';
 import { fetchTasks } from "../redux/features/taskSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const TaskDetailView = ({ open, onClose, task}) => {
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("subtasks");
-  const [boardMembers, setBoardMembers] = useState([]);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteInput, setInviteInput] = useState("");
   const [inviteDropdown, setInviteDropdown] = useState([]);
   const [loadingAssign, setLoadingAssign] = useState(false);
   const [assignees, setAssignees] = useState([]);
 
-  // Fetch board members on open
-  const fetchBoardMembers = async (boardId) => {
-    try {
-      const response = await boardsApi.getBoardById(boardId);
-      const memberIds = response.data.board.members;
-      const memberPromises = memberIds.map((id) =>
-        usersApi.getUserById(id.user)
-      );
-      const memberResponses = await Promise.all(memberPromises);
-      const membersDetail = memberResponses.map((res) => res.data);
-      setBoardMembers(membersDetail);
-    } catch (e) {
-      toast.error("Failed to fetch board members");
-    }
-  };
+  const boardMembers = useSelector((state) => state.kanban.activeBoardMembers);
 
-  useEffect(() => {
-    if (open && task?.boardId) {
-      fetchBoardMembers(task.boardId);
-    } else {
-      setBoardMembers([]);
-    }
-  }, [open, task]);
 
   const getInitials = (name) => {
     if (!name) return "";

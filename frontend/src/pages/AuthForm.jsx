@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {useDispatch} from 'react-redux';
 import toast from "react-hot-toast";
 import { loginUser, registerUser} from "../redux/features/authSlice";
+import { useIsOnline } from "../hooks/useIsOnline";
 
 export default function AuthPage() {
+ 
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
@@ -224,10 +226,13 @@ function Input({ label, type = "text", placeholder, onChange, error, ...props}) 
 }
 
 function AuthButton({ text }) {
+   const isOnline = useIsOnline();
+
   return (
     <button
       type="submit"
-      className="w-full py-2.5 bg-blue-800 hover:bg-blue-900 text-white rounded-md text-sm font-medium transition"
+      className="w-full py-2.5 bg-blue-800 hover:bg-blue-900 disabled:bg-opacity-60 text-white rounded-md text-sm font-medium transition"
+      disabled = {!isOnline}
     >
       {text}
     </button>
