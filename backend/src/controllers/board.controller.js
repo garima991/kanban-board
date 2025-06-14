@@ -12,7 +12,7 @@ export const createBoard = async (req, res) => {
         const { name } = req.body;
         const adminId = req.user._id;   // get user id to set the admin
         if (!name) {
-            return res.status(400).json({ msg: 'Please include a name for the board' });
+            return res.status(400).json({ message: 'Please include a name for the board' });
         }
 
         // create a new board with admin as the only member and admin role

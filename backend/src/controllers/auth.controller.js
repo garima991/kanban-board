@@ -25,18 +25,18 @@ export const registerUser = async (req, res) => {
     const { name, email, username, password, confirmPassword } = req.body;
 
     // validate the signup data
-    const { isValid, errors } = validateSignUpData({  name, username, email, password, confirmPassword  });
+    const { isValid, errors } = validateSignUpData({ name, username, email, password, confirmPassword });
 
     if (!isValid) {
       return res.status(400).json({ success: false, errors });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
-   
+
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
-    
+
     const user = await User.create({
       name,
       email,
@@ -50,12 +50,12 @@ export const registerUser = async (req, res) => {
 
     res
       .status(201)
-      .cookie("accessToken", accessToken, { httpOnly: true, sameSite : "none", secure: true })
-      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite : "none", secure: true })
-      .json({message: 'User registered successfully !', user: cleanUser, accessToken, refreshToken });
+      .cookie("accessToken", accessToken, { httpOnly: true, sameSite: "none", secure: true })
+      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", secure: true })
+      .json({ message: 'User registered successfully !', user: cleanUser, accessToken, refreshToken });
   }
-   catch (error) {
-    res.status(500).json({ message: "Error while registering user" , error: error.message});
+  catch (error) {
+    res.status(500).json({ message: "Error while registering user", error: error.message });
   }
 };
 
@@ -90,11 +90,11 @@ export const loginUser = async (req, res) => {
 
     res
       .status(200)
-      .cookie("accessToken", accessToken, { httpOnly: true, sameSite : "none", secure: true})
+      .cookie("accessToken", accessToken, { httpOnly: true, sameSite: "none", secure: true })
       .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", secure: true })
-      .json({message: 'User logged in successfully', user: cleanUser, accessToken, refreshToken });
+      .json({ message: 'User logged in successfully', user: cleanUser, accessToken, refreshToken });
   } catch (error) {
-    res.status(500).json({ message: "Login failed" , error: error.message});
+    res.status(500).json({ message: "Login failed", error: error.message });
   }
 };
 
@@ -110,14 +110,14 @@ export const logoutUser = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } });
     res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" });
   } catch (error) {
-    res.status(500).json({ message: "Logout failed" , error: error.message});
+    res.status(500).json({ message: "Logout failed", error: error.message });
   }
 };
 
 
 /**
  * @desc    Refresh access token using valid refresh token
- * @route   POST /auth/refresh
+ * @route   GET /auth/refresh
  * @access  Public
  */
 
@@ -128,18 +128,27 @@ export const refreshAccessToken = async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET_KEY);
     const user = await User.findById(decoded._id);
+    console.log(user);
     if (!user || user.refreshToken !== token) {
       return res.status(403).json({ message: "Invalid or expired token" });
     }
 
     const { accessToken, refreshToken } = await generateTokens(user);
-
     res
-      .cookie("accessToken", accessToken, { httpOnly: true, sameSite : "none", secure: true})
-      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite : "none", secure: true })
-      .json({ accessToken, refreshToken });
+      .cookie("accessToken", accessToken, { httpOnly: true, sameSite: "none", secure: true })
+      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", secure: true })
+      .json({
+        accessToken,
+        refreshToken,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
   } catch (error) {
-    res.status(500).json({ message: "Failed to refresh token" , error: error.message});
+    res.status(500).json({ message: "Failed to refresh token", error: error.message });
   }
 };
 
@@ -163,7 +172,7 @@ export const changePassword = async (req, res) => {
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Password update failed" , error: error.message});
+    res.status(500).json({ message: "Password update failed", error: error.message });
   }
 };
 
@@ -185,7 +194,7 @@ export const updateAccountDetails = async (req, res) => {
 
     res.json({ user });
   } catch (error) {
-    res.status(500).json({ message: "Update failed" , error: error.message});
+    res.status(500).json({ message: "Update failed", error: error.message });
   }
 };
 
@@ -201,6 +210,6 @@ export const deleteAccount = async (req, res) => {
     await User.findByIdAndDelete(req.user._id);
     res.json({ message: "Account deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Delete failed" , error: error.message});
+    res.status(500).json({ message: "Delete failed", error: error.message });
   }
 };
