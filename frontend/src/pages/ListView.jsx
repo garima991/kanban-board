@@ -8,7 +8,7 @@ const ListView = () => {
   const boards = useSelector((state) => state.kanban.value);
   const board = boards?.find((board) => board.isActive === true);
   const columns = board?.columns;
-  const tasks = useSelector((state) => state.task.tasks);
+  const tasks = useSelector((state) => state.boardTasks.tasks);
   const dispatch = useDispatch();
 
 

@@ -3,14 +3,13 @@ import AddTaskButton from "./AddTaskButton";
 import { useDispatch, useSelector } from "react-redux";
 import { TaskModalProvider } from "../contexts/TaskModalContext";
 import { LuLayoutDashboard } from "react-icons/lu";
-import { GoListUnordered, GoPersonAdd } from "react-icons/go";
-import { FaSearch } from "react-icons/fa";
 import { boardsApi, globalSearchApi, usersApi } from "../apis/axiosInstance";
 import toast from "react-hot-toast";
 import {
   addBoardMember,
   getActiveBoardMembers,
 } from "../redux/features/boardSlice";
+import { GoListUnordered, GoPersonAdd } from "react-icons/go";
 
 const Header = ({ activeView, setActiveView }) => {
   const dispatch = useDispatch();
@@ -18,12 +17,9 @@ const Header = ({ activeView, setActiveView }) => {
   const activeBoard = boards?.find((board) => board.isActive);
   const boardMembers = useSelector((state) => state.kanban.activeBoardMembers);
   const user = useSelector((state) => state.auth.user);
+  const isOnline = useSelector((state) => state.app.isOnline);
 
   const boardName = activeBoard ? activeBoard.name : " ";
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const modalRef = useRef(null);
   const [allUsers, setAllUsers] = useState([]); // Store all users initially
   const [userDropdown, setUserDropdown] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
@@ -74,7 +70,7 @@ const Header = ({ activeView, setActiveView }) => {
     dispatch(
       addBoardMember({
         boardId: activeBoard._id,
-        memberData: { userId, role: "member" },
+        memberData: { userId },
       })
     );
     setInviteInput("");
@@ -88,43 +84,10 @@ const Header = ({ activeView, setActiveView }) => {
     if (names.length === 1) return names[0][0].toUpperCase();
     return (names[0][0] + names[names.length - 1][0]).toUpperCase();
   };
-
-  // // Open search modal
-  // const handleOpenModal = () => {
-  //   setIsSearchModalOpen(true);
-  //   setSearchTerm("");
-  //   setSearchResults([]);
-  // };
-
-  // // Close modal
-  // const handleCloseModal = () => {
-  //   setIsSearchModalOpen(false);
-  //   setSearchTerm("");
-  //   setSearchResults([]);
-  // };
-
-  // Debounced search
-  const handleSearch = debounce(async (term) => {
-    if (!term.trim()) return;
-    try {
-      const { data } = await globalSearchApi.globalSearch(term);
-      setSearchResults(data?.results || []);
-    } catch (err) {
-      console.error("Search error:", err);
-    }
-  }, 500);
-
-  useEffect(() => {
-    if (searchTerm.trim()) {
-      handleSearch(searchTerm);
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchTerm]);
-
+  
   return (
-    <div className="px-3 py-1 flex flex-col gap-1 bg-white text-black border-b-2 border-gray-300">
-      <div className="flex justify-between items-center w-full bg-blue-100 py-3 px-6 mt-2 rounded-md">
+    <div className="px flex flex-col gap-1 bg-white text-black border-b-2 border-gray-300">
+      <div className="flex justify-between items-center w-full bg-blue-100 py-3 px-4 rounded-md">
         <h1 className="text-4xl font-bold rounded-xl">{boardName}</h1>
         <div className="flex items-center gap-2">
           <div className="flex -space-x-2">
@@ -138,10 +101,12 @@ const Header = ({ activeView, setActiveView }) => {
               </span>
             ))}
           </div>
-          {user.role === "admin" && (
+          
+          {activeBoard?.admin === user._id && (
             <button
-              className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200"
+              className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed"
               onClick={() => setShowUsers(!showUsers)}
+              disabled={!isOnline}
             >
               <GoPersonAdd /> Invite
             </button>
@@ -191,7 +156,7 @@ const Header = ({ activeView, setActiveView }) => {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6 px-3">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 ">
             <LuLayoutDashboard />
             <Button
               isActive={activeView === "kanban"}
@@ -214,65 +179,9 @@ const Header = ({ activeView, setActiveView }) => {
 
         {/* Search & Add Task */}
         <div className="flex items-center gap-1 p-2">
-          <div className="flex flex-row justify-between items-center px-2 py-1 border border-gray-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-500">
-            <input
-              type="search"
-              className="no-clear outline-none"
-              placeholder="Search..."
-              onClick={() => setIsSearchModalOpen(true)}
-            />
-            <FaSearch
-              onClick={() => {
-                setIsSearchModalOpen(true);
-              }}
-              className="cursor-pointer text-gray-600 hover:text-black transition"
-            />
-          </div>
-          <TaskModalProvider>
+          {/* <TaskModalProvider> */}
             <AddTaskButton />
-          </TaskModalProvider>
-
-          {/* Search Dropdown Modal */}
-          {isSearchModalOpen && (
-            <>
-              <div
-                className="fixed inset-0 bg-slate-500/30 w-full h-full p-20 z-50"
-                onClick={() => setIsSearchModalOpen(false)}
-              />
-              <div
-                // ref={modalRef}
-                className="absolute right-[40%] z-50 w-72 max-h-80 overflow-y-auto bg-white border border-gray-300 shadow-md rounded-md p-4"
-              >
-                <input
-                  autoFocus
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="Search tasks..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-
-                {searchResults.length > 0 ? (
-                  <ul className="mt-2 space-y-2">
-                    {searchResults.map((result, idx) => (
-                      <li
-                        key={idx}
-                        className="p-2 rounded hover:bg-blue-100 cursor-pointer"
-                      >
-                        {result.title}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  searchTerm && (
-                    <p className="mt-2 text-sm text-gray-500">
-                      No results found.
-                    </p>
-                  )
-                )}
-              </div>
-            </>
-          )}
+          {/* </TaskModalProvider> */}
         </div>
       </div>
     </div>
@@ -287,7 +196,7 @@ const Button = ({ children, isActive, onClick }) => {
         ${
           isActive
             ? "border-black border-b-2"
-            : "border-transparent hover:border-gray-500"
+            : "border-transparent hover:border-b-2 hover:border-gray-200"
         } 
         transition-all duration-200`}
     >
@@ -298,15 +207,3 @@ const Button = ({ children, isActive, onClick }) => {
 
 export default Header;
 
-const handleGlobalSearch = () => {};
-
-// Custom debounce function
-const debounce = (func, delay) => {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
-};

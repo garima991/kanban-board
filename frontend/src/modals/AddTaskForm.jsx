@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
-import { v4 as uuidv4 } from "uuid";
 import { useTaskModal } from "../contexts/TaskModalContext";
 import { useSelector, useDispatch } from "react-redux";
-import { addTask } from "../redux/features/boardSliceOld.js";
 import { useState } from "react";
 import { tasksApi } from "../apis/axiosInstance.js";
 import toast from "react-hot-toast";
@@ -29,23 +27,23 @@ const AddTaskForm = () => {
 
   const validateForm = () => {
     if (title.trim() === "") {
-      alert("Task title is required");
+      toast.error("Task title is required");
       return false;
     }
     if (!dueDate) {
-      alert("Due date is required");
+      toast.error("Due date is required");
       return false;
     }
     if (description.trim() === "") {
-      alert("Description is required");
+      toast.error("Description is required");
       return false;
     }
     if (title.length > 50) {
-      alert("Task title cannot exceed 50 characters");
+      toast.error("Task title cannot exceed 50 characters");
       return false;
     }
     if (description.length > 200) {
-      alert("Description cannot exceed 200 characters");
+      toast.error("Description cannot exceed 200 characters");
       return false;
     }
     return true;
@@ -92,9 +90,9 @@ const AddTaskForm = () => {
       exit={{ scale: 0}}
       // transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={(e) => e.stopPropagation()}
-      className="bg-white text-white py-2 rounded-xl w-full max-w-lg shadow-xl cursor-default relative overflow-hidden"
+      className="fixed text-white rounded-xl w-full max-w-lg shadow-xl cursor-default overflow-hidden"
     >
-      <div className="relative z-40 flex flex-col justify-center items-center gap-4">
+      <div className="relative z-40 flex flex-col justify-center items-center gap-4 bg-[#FFFFFF]">
         <h3 className="font-bold text-black text-2xl p-3">Add New Task</h3>
 
         {/* title */}

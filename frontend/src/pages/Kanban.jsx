@@ -7,7 +7,7 @@ const Kanban = () => {
   const dispatch = useDispatch();
   const boards = useSelector((state) => state.kanban.value);
   const isBoardLoading = useSelector((state) => state.kanban.isLoading);
-  
+ 
   const board = useMemo(() => boards?.find((b) => b.isActive), [boards]);
   const { columns, boardId } = useMemo(
     () => ({
@@ -18,7 +18,7 @@ const Kanban = () => {
   );
 
   const { isTaskLoading } = useSelector(
-    (state) => state.task
+    (state) => state.boardTasks
   );
 
   useEffect(() => {
@@ -37,8 +37,8 @@ const Kanban = () => {
     );
   }
 
-  return board ? (
-    <div className="flex flex-row gap-4">
+  return board ? ( 
+    <div className="flex flex-row gap-4 py-2">
       {columns.map((col, index) => (
         <Column
           key={col._id || index}

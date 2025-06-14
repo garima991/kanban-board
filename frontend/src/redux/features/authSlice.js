@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { authApi } from "../../apis/axiosInstance";
+import { authApi, usersApi } from "../../apis/axiosInstance";
 import toast from "react-hot-toast";
 
 /* ───────────── ASYNC THUNKS ───────────── */
@@ -54,7 +54,7 @@ export const refreshUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await authApi.refreshToken();
-      console.log("refreshUser response", res);
+      // console.log("refreshUser response", res);
       return res.data.user;
     } catch (err) {
       return rejectWithValue(err?.response?.data?.message || "Refresh failed");
@@ -65,8 +65,12 @@ export const refreshUser = createAsyncThunk(
 export const getMe = createAsyncThunk(
   "auth/getMe",
   async (_, { rejectWithValue }) => {
+    if (!navigator.onLine) {
+      return rejectWithValue("offline");
+    }
+
     try {
-      const res = await authApi.getMe();
+      const res = await usersApi.getMe();
       return res.data.user;
     } catch (err) {
       return rejectWithValue(err?.response?.data?.message || "Fetch user failed");
@@ -80,6 +84,7 @@ const initialState = {
   user: null,
   isLoading: false,
   error: null,
+  authChecked: false,
 };
 
 /* ───────────── SLICE ───────────── */
@@ -127,6 +132,8 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.isLoading = false;
         state.user = null;
+        state.authChecked = true;
+        state.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -140,10 +147,12 @@ const authSlice = createSlice({
       .addCase(refreshUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.authChecked = true;
       })
       .addCase(refreshUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.authChecked = true;
       })
 
       // GetMe
@@ -153,10 +162,16 @@ const authSlice = createSlice({
       .addCase(getMe.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.authChecked = true;
       })
       .addCase(getMe.rejected, (state, action) => {
+        if (action.payload === "offline") {
+          state.isLoading = false;
+          return;  // don't reset user or show error
+        }
         state.isLoading = false;
         state.user = null; // in case token expired
+        state.authChecked = true;
         state.error = action.payload;
       })
   },

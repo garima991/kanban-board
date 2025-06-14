@@ -8,11 +8,11 @@ import {
   FaTags,
 } from "react-icons/fa";
 import { GoPeople } from "react-icons/go";
-import SubtasksSection from './SubtasksSection';
-import { fetchTasks } from "../redux/features/taskSlice";
+import SubtasksSection from "./SubtasksSection";
+import { assignTask, fetchTasks } from "../redux/features/taskSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-const TaskDetailView = ({ open, onClose, task}) => {
+const TaskDetailView = ({ open, onClose, task }) => {
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("subtasks");
   const [showInvite, setShowInvite] = useState(false);
@@ -23,7 +23,6 @@ const TaskDetailView = ({ open, onClose, task}) => {
 
   const boardMembers = useSelector((state) => state.kanban.activeBoardMembers);
 
-
   const getInitials = (name) => {
     if (!name) return "";
     const names = name.split(" ");
@@ -33,13 +32,10 @@ const TaskDetailView = ({ open, onClose, task}) => {
 
   useEffect(() => {
     if (task?.assignedTo && boardMembers.length > 0) {
-      // Map user IDs to user objects from boardMembers
       const assignedUsers = task.assignedTo
         .map((userId) => boardMembers.find((user) => user._id === userId))
-        .filter(Boolean); // remove undefined if no match
+        .filter(Boolean);
       setAssignees(assignedUsers);
-    } else {
-      setAssignees([]);
     }
   }, [task, boardMembers]);
 
@@ -54,32 +50,30 @@ const TaskDetailView = ({ open, onClose, task}) => {
     }
   }, [inviteInput, boardMembers]);
 
-
   // Assign user to a task
   const handleAssign = async (user) => {
     if (!task?.boardId || !task?._id) return;
-    setLoadingAssign(true);
-    try {
-      await tasksApi.assignTask(task.boardId, task._id, user._id);
-      toast.success(`Assigned ${user.name}`);
-      dispatch(fetchTasks(task.boardId));
-      setShowInvite(false);
-      setInviteInput("");
-      setInviteDropdown([]);
-    } catch (e) {
-      toast.error("Failed to assign user");
-    } finally {
-      setLoadingAssign(false);
-    }
+    dispatch(
+      assignTask({
+        boardId: task.boardId,
+        taskId: task._id,
+        userId: user._id,
+      })
+    );
+    setShowInvite(false);
   };
 
- 
   if (!open || !task) return null;
 
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-0 relative overflow-y-auto max-h-[95vh] border border-gray-100">
+    <div
+      className="fixed bg-slate-900/30 inset-0 z-50 flex items-center justify-center"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-0 relative overflow-y-auto max-h-[95vh] border border-gray-100"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close Button */}
         <button
           className="absolute top-4 right-6 text-gray-400 hover:text-black text-3xl font-bold z-10"
@@ -139,40 +133,43 @@ const TaskDetailView = ({ open, onClose, task}) => {
                 </button>
                 {showInvite && (
                   <>
-                  <div className="fixed inset-0 w-screen h-screen bg-transparent" onClick={() => setShowInvite(false)}/>
-                  <div
-                    // ref={inviteRef}
-                    className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-20 w-48 p-2"
-                  >
-                    <input
-                      className="w-full p-1 border rounded mb-2 text-xs"
-                      placeholder="Type name..."
-                      value={inviteInput}
-                      onChange={(e) => setInviteInput(e.target.value)}
+                    <div
+                      className="fixed inset-0 w-screen h-screen bg-transparent"
+                      onClick={() => setShowInvite(false)}
                     />
-                    <div className="max-h-32 overflow-y-auto">
-                      {inviteDropdown.length > 0 ? (
-                        inviteDropdown.map((user) => (
-                          <div
-                            key={user._id}
-                            className="flex justify-start p-1 hover:bg-blue-100 rounded cursor-pointer text-sm"
-                            onClick={() => handleAssign(user)}
-                          >
-                            {user.name}
+                    <div
+                      // ref={inviteRef}
+                      className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-20 w-48 p-2"
+                    >
+                      <input
+                        className="w-full p-1 border rounded mb-2 text-xs"
+                        placeholder="Type name..."
+                        value={inviteInput}
+                        onChange={(e) => setInviteInput(e.target.value)}
+                      />
+                      <div className="max-h-32 overflow-y-auto">
+                        {inviteDropdown.length > 0 ? (
+                          inviteDropdown.map((user) => (
+                            <div
+                              key={user._id}
+                              className="flex justify-start p-1 hover:bg-blue-100 rounded cursor-pointer text-sm"
+                              onClick={() => handleAssign(user)}
+                            >
+                              {user.name}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-xs text-gray-400">
+                            No users found
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-xs text-gray-400">
-                          No users found
+                        )}
+                      </div>
+                      {loadingAssign && (
+                        <div className="text-xs text-blue-500 mt-1">
+                          Assigning...
                         </div>
                       )}
                     </div>
-                    {loadingAssign && (
-                      <div className="text-xs text-blue-500 mt-1">
-                        Assigning...
-                      </div>
-                    )}
-                  </div>
                   </>
                 )}
               </div>
@@ -244,9 +241,7 @@ const TaskDetailView = ({ open, onClose, task}) => {
         </div>
         {/* Tab content */}
         <div className="p-6 pb-16 max-h-[60vh] overflow-y-auto">
-          {activeTab === "subtasks" && (
-            <SubtasksSection task={task} />
-          )}
+          {activeTab === "subtasks" && <SubtasksSection task={task} />}
           {activeTab === "comments" && (
             <div className="text-sm text-gray-500">
               Comments section coming soon...

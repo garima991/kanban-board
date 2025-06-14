@@ -7,18 +7,18 @@ export const fetchBoards = createAsyncThunk("board/fetchBoards", async (_, { rej
   try {
     const res = await boardsApi.getBoards();
     return res.data.boards;
-  } catch (err) {
-    return rejectWithValue(err.message);
-  }
+  } catch (error){
+      rejectWithValue(error.response?.data?.message || error.message);
+    }
 });
 
 export const createBoard = createAsyncThunk("board/createBoard", async (boardData, { dispatch, rejectWithValue }) => {
   try {
     const res = await boardsApi.createBoard(boardData);
     return res.data.board;
-  } catch (err) {
-    return rejectWithValue(err.message);
-  }
+  }catch (error){
+      rejectWithValue(error.response?.data?.message || error.message);
+    }
 });
 
 export const getActiveBoardMembers = createAsyncThunk("board/getBoardMembers", async (boardId, { rejectWithValue }) => {
@@ -26,9 +26,9 @@ export const getActiveBoardMembers = createAsyncThunk("board/getBoardMembers", a
     const res = await boardsApi.getBoardMembers(boardId);
     return res.data.members;
   }
-  catch (err) {
-    return rejectWithValue(err.message);
-  }
+  catch (error){
+      rejectWithValue(error.response?.data?.message || error.message);
+    }
 });
 
 export const addBoardMember = createAsyncThunk("board/addBoardMember", async ({ boardId, memberData }, { rejectWithValue }) => {
@@ -36,9 +36,9 @@ export const addBoardMember = createAsyncThunk("board/addBoardMember", async ({ 
     const res = await boardsApi.addMember(boardId, memberData);
     return res.data.members;
   }
-  catch (err) {
-    return rejectWithValue(err.message);
-  }
+  catch (error){
+      rejectWithValue(error.response?.data?.message || error.message);
+    }
 })
 
 export const boardSlice = createSlice({
@@ -46,7 +46,8 @@ export const boardSlice = createSlice({
   initialState: {
     value: [],
     activeBoardMembers: [],
-    isLoading: false
+    isLoading: false,
+    error: null,
   },
 
   reducers: {
@@ -76,7 +77,7 @@ export const boardSlice = createSlice({
       })
       .addCase(fetchBoards.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        toast.error("Failed to fetch boards !");
       })
 
       // create Board
@@ -91,7 +92,7 @@ export const boardSlice = createSlice({
       .addCase(createBoard.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-        toast.error(`Failed to create baord: ${action.payload}`)
+        toast.error("Failed to create board !")
       })
 
       // fetch active board members
@@ -100,7 +101,7 @@ export const boardSlice = createSlice({
       })
       .addCase(getActiveBoardMembers.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.activeBoardMembers = action.payload
+        state.activeBoardMembers = action.payload;
       })
       .addCase(getActiveBoardMembers.rejected, (state, action) => {
         state.isLoading = false;
@@ -110,7 +111,6 @@ export const boardSlice = createSlice({
       // add board members
       .addCase(addBoardMember.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(addBoardMember.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -120,6 +120,7 @@ export const boardSlice = createSlice({
       .addCase(addBoardMember.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        toast.error("Failed to add member");
       })
 
   },

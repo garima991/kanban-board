@@ -1,59 +1,60 @@
 import { useState } from "react";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {useDispatch} from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { loginUser, registerUser} from "../redux/features/authSlice";
-import { useIsOnline } from "../hooks/useIsOnline";
+import { loginUser, registerUser } from "../redux/features/authSlice";
 
 export default function AuthPage() {
- 
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'member',
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "member",
   });
 
   const [formErrors, setFormErrors] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
-    const {name, value} = e.target;
-    setFormData((prev) => ({...prev, [name]: value}));
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const user = useSelector((state) => state.auth.user);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      setFormErrors({});  // Reset errors before making the request
+      setFormErrors({}); // Reset errors before making the request
 
       if (isLoggedIn) {
         // Login flow
 
-        const user = dispatch(loginUser({
-          email: formData.email,
-          password: formData.password,
-        })).unwrap();
-      
+        dispatch(
+          loginUser({
+            email: formData.email,
+            password: formData.password,
+          })
+        );
+
         const role = user.role;
         console.log(role);
-        if(role === 'admin'){
-          navigate('/admin/dashboard');
-        }
-        else{
-          navigate('/admin/dashboard');
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/member/dashboard");
         }
 
         // navigate('/'); // Redirect after successful login
@@ -64,24 +65,24 @@ export default function AuthPage() {
         //   return;
         // }
 
-        const user = dispatch(registerUser({
-          name: formData.name,
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-          role: formData.role,
-        })).unwrap();
+        dispatch(
+          registerUser({
+            name: formData.name,
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            confirmPassword: formData.confirmPassword,
+            role: formData.role,
+          })
+        );
 
-    
-        toast.success('Account Created Successfully !');
-        
+        toast.success("Account Created Successfully !");
+
         // login after registering
         setIsLoggedIn(true);
       }
-    } 
-    catch (error) {
-      const {response} = error;
+    } catch (error) {
+      const { response } = error;
       const err = response?.data;
 
       if (err?.errors) {
@@ -97,9 +98,8 @@ export default function AuthPage() {
         console.log(formErrors);
       } else if (err?.error) {
         toast.error(err.error);
-      }
-      else{
-        console.log("")
+      } else {
+        console.log("");
       }
     }
   };
@@ -159,24 +159,46 @@ export default function AuthPage() {
                 className="flex flex-col gap-5"
                 onSubmit={handleFormSubmit}
               >
-                <Input label="Full Name" name="name" placeholder="Clay Jensen" onChange={handleChange} error={formErrors.name}/>
-                <Input label="Username" name="username" placeholder="JensenClay123" minLength={5} onChange={handleChange} error={formErrors.username}/>
-                <Input label="Email" name="email" type="email" placeholder="you@example.com" onChange={handleChange} error={formErrors.email}/>
-                <Input label="Password" name="password" type="password" placeholder="At least 8 characters" minLength={8} onChange={handleChange} error={formErrors.password}/>
-                <Input label="Confirm Password" name="confirmPassword" type="password" placeholder="Confirm password" onChange={handleChange} error={formErrors.confirmPassword}/>
-
-                <div>
-                  <select
-                    required
-                    defaultValue="member"
-                    onChange={handleChange}
-                    value={formData.role}
-                    className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-800"
-                  >
-                    <option value="member">Member</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
+                <Input
+                  label="Full Name"
+                  name="name"
+                  placeholder="Clay Jensen"
+                  onChange={handleChange}
+                  error={formErrors.name}
+                />
+                <Input
+                  label="Username"
+                  name="username"
+                  placeholder="JensenClay123"
+                  minLength={5}
+                  onChange={handleChange}
+                  error={formErrors.username}
+                />
+                <Input
+                  label="Email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  onChange={handleChange}
+                  error={formErrors.email}
+                />
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  placeholder="At least 8 characters"
+                  minLength={8}
+                  onChange={handleChange}
+                  error={formErrors.password}
+                />
+                <Input
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm password"
+                  onChange={handleChange}
+                  error={formErrors.confirmPassword}
+                />
 
                 <AuthButton text="Sign Up" />
                 <SwitchLink isLogin={isLoggedIn} setIsLogin={setIsLoggedIn} />
@@ -191,8 +213,22 @@ export default function AuthPage() {
                 className="flex flex-col gap-5"
                 onSubmit={handleFormSubmit}
               >
-                <Input label="Email" name="email" type="email" placeholder="you@example.com" onChange={handleChange} error={formErrors.email}/>
-                <Input label="Password" name="password" type="password" placeholder="••••••••" onChange={handleChange} error={formErrors.password}/>
+                <Input
+                  label="Email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  onChange={handleChange}
+                  error={formErrors.email}
+                />
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  onChange={handleChange}
+                  error={formErrors.password}
+                />
 
                 <AuthButton text="Login" />
                 <SwitchLink isLogin={isLoggedIn} setIsLogin={setIsLoggedIn} />
@@ -205,7 +241,14 @@ export default function AuthPage() {
   );
 }
 
-function Input({ label, type = "text", placeholder, onChange, error, ...props}) {
+function Input({
+  label,
+  type = "text",
+  placeholder,
+  onChange,
+  error,
+  ...props
+}) {
   return (
     <div className="relative">
       <input
@@ -213,10 +256,10 @@ function Input({ label, type = "text", placeholder, onChange, error, ...props}) 
         placeholder={placeholder}
         onChange={onChange}
         {...props}
-        error = {error}
+        error={error}
         className="w-full px-4 py-3 text-sm text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-800"
       />
-     
+
       <label className="absolute left-4 -top-2 text-xs bg-white px-1 text-gray-500">
         {label}
       </label>
@@ -226,13 +269,13 @@ function Input({ label, type = "text", placeholder, onChange, error, ...props}) 
 }
 
 function AuthButton({ text }) {
-   const isOnline = useIsOnline();
+  const isOnline = useSelector((state) => state.app.isOnline);
 
   return (
     <button
       type="submit"
       className="w-full py-2.5 bg-blue-800 hover:bg-blue-900 disabled:bg-opacity-60 text-white rounded-md text-sm font-medium transition"
-      disabled = {!isOnline}
+      disabled={!isOnline}
     >
       {text}
     </button>

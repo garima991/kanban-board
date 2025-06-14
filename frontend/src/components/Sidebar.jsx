@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FiChevronsRight, FiHome } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa6";
 import { AnimatePresence, motion } from "framer-motion";
@@ -8,6 +8,7 @@ import NewBoardModal from "../modals/NewBoardModal";
 import { boardsApi } from "../apis/axiosInstance.js";
 import { setBoardActive, setBoards } from "../redux/features/boardSlice.js";
 import ProfileSection from "./ProfileSection.jsx";
+import taskoraIcon from "../assets/taskora-icon.png"
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
@@ -138,7 +139,7 @@ const Logo = () => {
       layout
       className="grid size-10 shrink-0 place-content-center rounded-md bg-blue-900"
     >
-      
+      <img src = {taskoraIcon} alt = "logo"/>
     </motion.div>
   );
 };
@@ -178,6 +179,8 @@ const ToggleClose = ({ open, setOpen }) => {
 const AddBoardModal = () => {
   const { isBoardFormOpen, setBoardFormOpen } = useBoardModal();
 
+    const isOnline = useSelector((state) => state.app.isOnline);
+
   return (
     <AnimatePresence>
       {isBoardFormOpen && (
@@ -186,7 +189,8 @@ const AddBoardModal = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setBoardFormOpen(false)}
-          className="bg-slate-900/20 p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
+          className="fixed bg-slate-900/30 p-8 inset-0 z-50 grid place-items-center cursor-pointer"
+          disable={!isOnline}
         >
          <NewBoardModal />
         </motion.div>

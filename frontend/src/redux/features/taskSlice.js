@@ -4,7 +4,6 @@ import { boardsApi, tasksApi } from "../../apis/axiosInstance";
 import { toast } from "react-hot-toast";
 
 // Async Thunks
-
 export const fetchTasks = createAsyncThunk(
   "task/fetchTasks",
   async (boardId, { rejectWithValue }) => {
@@ -61,7 +60,7 @@ export const updateSubtask = createAsyncThunk(
       const res = await tasksApi.updateSubtask(boardId, taskId, subtaskId, subtaskData);
       return res.data.task;
     }
-    catch {
+    catch (error){
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   });
@@ -73,7 +72,7 @@ export const deleteSubtask = createAsyncThunk(
       const res = await tasksApi.deleteSubtask(boardId, taskId, subtaskId);
       return res.data.task;
     }
-    catch {
+    catch(error){
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   });
@@ -82,14 +81,23 @@ export const deleteSubtask = createAsyncThunk(
 export const updateTask = createAsyncThunk(
   "task/updateTask",
   async ({ boardId, taskId, taskData }, { dispatch, rejectWithValue }) => {
-    try{
+    try {
       const res = await tasksApi.updateTask(boardId, taskId, taskData);
       return res.data.task;
     }
-    catch{
+    catch (error){
       rejectWithValue(error.response?.data?.message || error.message);
     }
+  });
 
+
+export const assignTask = createAsyncThunk("task/assignTask", async ({ boardId, taskId, userId }, { rejectWithValue }) => {
+  try {
+    const res = await tasksApi.assignTask(boardId, taskId, userId);
+    return res.data;
+  } catch (error){
+      rejectWithValue(error.response?.data?.message || error.message);
+    }
 })
 
 
@@ -235,10 +243,38 @@ const taskSlice = createSlice({
       .addCase(updateTask.rejected, (state, action) => {
         state.error = action.payload;
         toast.error("Failed to update task", error);
-      });
+      })
+
+      // assign task
+      .addCase(assignTask.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(assignTask.fulfilled, (state, action) => {
+        state.loading = false;
+        const { taskId, userId } = action.payload;
+        const task = state.tasks.find(t => t._id === taskId);
+        if (task && !task.assignedTo.includes(userId)) {
+          task.assignedTo.push(userId);
+        }
+        toast.success("Assigned successfully");
+      })
+      .addCase(assignTask.rejected, (state, action) => {
+        state.loading = false;
+        toast.error("Failed to assign user");
+      })
 
   },
 });
+
+
+const selectAllTasks = (state) => state.boardTasks.tasks;
+
+export const makeSelectTasksByStatus = () =>
+  createSelector(
+    [selectAllTasks, (_, status) => status],
+    (tasks, status) => tasks.filter((task) => task.status === status)
+  );
 
 
 export default taskSlice.reducer;

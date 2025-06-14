@@ -20,12 +20,26 @@ const axiosInstance = axios.create({
 // });
 
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Automatically refresh the access token when it expires  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ No API calls when offline ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+axiosInstance.interceptors.request.use((config) => {
+  if (!navigator.onLine) {
+    return Promise.reject(new Error("You're offline"));
+  }
+  return config;
+});
+
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  Automatically refresh the access token when it expires  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 axiosInstance.interceptors.response.use(
     res => res, // If request is successful, return response
     async (err) => {
         const originalRequest = err.config;  // Get the failed request
+        if (!navigator.onLine) {
+            // Don’t auto-logout on offline
+            return Promise.reject(err);
+        }
 
         // If the error is 401 (Unauthorized) and the request hasn't been retried yet
         if (err.response?.status === 401 && !originalRequest._retry) {
@@ -34,7 +48,7 @@ axiosInstance.interceptors.response.use(
             try {
                 // Attempt to refresh the token
                 await authApi.refreshToken();
-                
+
                 // Retry the original request after successful token refresh
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
@@ -62,7 +76,9 @@ export const boardsApi = {
     updateBoard: (boardId, boardData) => axiosInstance.patch(`boards/${boardId}`, boardData),
     deleteBoard: (boardId) => axiosInstance.delete(`boards/${boardId}`),
     addMember: (boardId, memberData) => axiosInstance.post(`boards/${boardId}/members`, memberData),
+    getBoardMembers: (boardId) => axiosInstance.get(`boards/${boardId}/members`),
     removeMember: (boardId, memberId) => axiosInstance.delete(`boards/${boardId}/members/${memberId}`),
+
 };
 
 export const tasksApi = {
