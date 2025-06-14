@@ -142,12 +142,12 @@ export const addMember = async (req, res) => {
         board.members.push({ user: userId, role });
         await board.save();
 
-        const updatedBoard = await Board.findById(boardId).populate('members.user', 'name email');
+        const updatedBoard = await Board.findById(boardId).populate('members.user', 'name email role');
         const members = updatedBoard.members.map(m => ({
                 _id: m.user._id,
                 name: m.user.name,
                 email: m.user.email,
-                role: m.role,
+                role: m.user.role,
             }));
 
         res.status(200).json({ message: 'Member added successfully', members });

@@ -6,7 +6,7 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: ['https://taskora-three.vercel.app', 'http://localhost:5173'], // frontend origin
+  origin: ['https://taskora.garima.tech/', 'https://taskora-three.vercel.app', 'http://localhost:5173'], // frontend origin
   credentials: true
 }));
 app.use(express.json({ limit: '16kb' }));
