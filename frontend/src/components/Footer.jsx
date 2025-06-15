@@ -18,11 +18,11 @@ const Footer = () => {
           <p className="text-gray-300 mb-4">
             Drag. Drop. Done. Experience effortless Kanban productivity.
           </p>
-          {/* <Link to="/signup"> */}
+          <Link to="/auth">
             <button className="bg-white text-[#0B1A33] font-semibold px-6 py-2 rounded-full shadow hover:bg-gray-200 transition duration-300">
               Try Taskora Now
             </button>
-          {/* </Link> */}
+          </Link>
         </div>
 
         

@@ -96,11 +96,12 @@ export default function AuthPage() {
           confirmPassword: errorMessage.confirmPassword,
         });
         console.log(formErrors);
-      } else if (err?.error) {
-        toast.error(err.error);
       } else {
-        console.log("");
+        toast.error(err.error);
       }
+      //  else {
+      //   console.log("");
+      // }
     }
   };
 
