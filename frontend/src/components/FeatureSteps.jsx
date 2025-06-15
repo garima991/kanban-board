@@ -1,32 +1,37 @@
 import { motion } from "framer-motion";
+import login from "../assets/login.png";
+import createBoard from "../assets/create-board.png";
+import addTask from "../assets/add-task.png";
+import manageTask from "../assets/manage-task.png";
+
 
 const steps = [
   {
     step: 1,
     title: "Sign Up or Login",
     desc: "Create an account or log in to access your Kanban boards.",
-    image: "/images/login-signup.png",
+    image: login,
     spanClass: "", // regular
   },
   {
     step: 2,
     title: "Create a Board",
     desc: "Start organizing your workflow by creating your first Kanban board.",
-    image: "/images/create-board.png",
+    image: createBoard,
     spanClass: "", // taller
   },
   {
     step: 3,
     title: "Add Tasks",
     desc: "Categorize tasks into To-Do, In Progress, and Done.",
-    image: "/images/add-tasks.gif",
+    image: addTask,
     spanClass: "", // regular
   },
   {
     step: 4,
     title: "Assign & Organize",
     desc: "Assign tasks and set priorities with your team.",
-    image: "/images/assign-users.png",
+    image: manageTask,
     spanClass: "", // taller
   },
 ];
@@ -34,7 +39,7 @@ const steps = [
 function FeatureCard({ step, title, desc, image, delay, spanClass }) {
   return (
     <motion.div
-      className={`bg-white rounded-2xl border shadow-md p-6 flex flex-col justify-between ${spanClass}`}
+      className={`bg-white rounded-2xl border shadow-md p-6 flex flex-col justify-between items-center ${spanClass} max-h-fit`}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -45,8 +50,8 @@ function FeatureCard({ step, title, desc, image, delay, spanClass }) {
         <h3 className="text-lg font-bold text-gray-800 mb-2">{title}</h3>
         <p className="text-sm text-gray-500 mb-4">{desc}</p>
       </div>
-      <div className="rounded-xl overflow-hidden border h-full">
-        <img src={image} alt={title} className="w-full h-full object-cover" />
+      <div className="border-2 rounded-2xl overflow-hidden">
+        <img src={image} alt={title} className="w-full h-52 object-contain " />
       </div>
     </motion.div>
   );
@@ -65,7 +70,7 @@ const FeatureSteps = () => {
               How <span className="font-extrabold">Taskora </span> works . . .
             </motion.h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-[250px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {steps.map((step, index) => (
             <FeatureCard key={index} {...step} delay={index * 0.2} />
           ))}
