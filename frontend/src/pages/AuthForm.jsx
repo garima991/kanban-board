@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { loginUser, registerUser } from "../redux/features/authSlice";
+import {
+  loginUser,
+  registerUser,
+  clearFieldErrors,
+} from "../redux/features/authSlice";
 
 export default function AuthPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -16,98 +20,77 @@ export default function AuthPage() {
     role: "member",
   });
 
-  const [formErrors, setFormErrors] = useState({
-    name: "",
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const navigate = useNavigate()
+  const dispatch = useDispatch();
+   
+  const {user, errorMessage, fieldErrors, loading } = useSelector(
+    (state) => state.auth
+  );
+
+  // Clear form & field errors on mode switch
+  useEffect(() => {
+    dispatch(clearFieldErrors());
+    setFormData({
+      name: "",
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "member",
+    });
+  }, [isLoggedIn, dispatch]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+    }
+  }, [errorMessage]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const user = useSelector((state) => state.auth.user);
-
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setFormErrors({}); // Reset errors before making the request
 
-      if (isLoggedIn) {
-        // Login flow
+    if (isLoggedIn) {
+      const result = await dispatch(
+        loginUser({
+          email: formData.email,
+          password: formData.password,
+        })
+      ).unwrap();
 
-        dispatch(
-          loginUser({
-            email: formData.email,
-            password: formData.password,
-          })
-        );
-
-        const role = user.role;
+      const role = user.role;
         console.log(role);
         if (role === "admin") {
           navigate("/admin/dashboard");
         } else {
           navigate("/member/dashboard");
         }
+    } else {
+      const resultAction = await dispatch(
+        registerUser({
+          name: formData.name,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          role: formData.role,
+        })
+      );
 
-        // navigate('/'); // Redirect after successful login
-      } else {
-        // Signup flow
-        // if (formData.password !== formData.confirmPassword) {
-        //   toast.error('Passwords do not match !');
-        //   return;
-        // }
-
-        dispatch(
-          registerUser({
-            name: formData.name,
-            username: formData.username,
-            email: formData.email,
-            password: formData.password,
-            confirmPassword: formData.confirmPassword,
-            role: formData.role,
-          })
-        );
-
-        toast.success("Account Created Successfully !");
-
-        // login after registering
+      if (registerUser.fulfilled.match(resultAction)) {
+        toast.success("Registration successful! Please log in.");
         setIsLoggedIn(true);
       }
-    } catch (error) {
-      const { response } = error;
-      const err = response?.data;
-
-      if (err?.errors) {
-        // Backend validation errors (from validateSignUpData)
-        const errorMessage = err.errors;
-        setFormErrors({
-          name: errorMessage.name,
-          email: errorMessage.email,
-          username: errorMessage.username,
-          password: errorMessage.password,
-          confirmPassword: errorMessage.confirmPassword,
-        });
-        console.log(formErrors);
-      } else {
-        toast.error(err.error);
-      }
-      //  else {
-      //   console.log("");
-      // }
     }
   };
 
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-gray-100 overflow-hidden">
-      {/* Animated Left Panel */}
+      {/* Left Panel */}
       <motion.div
         key={isLoggedIn ? "login-sider" : "signup-sider"}
         variants={transitionVariants}
@@ -126,7 +109,7 @@ export default function AuthPage() {
             className="text-center"
           >
             <h1 className="text-4xl font-bold mb-4">
-              {isLoggedIn ? "Welcome Back !" : "Get Started 🚀"}
+              {isLoggedIn ? "Welcome Back!" : "Get Started 🚀"}
             </h1>
             <p className="text-lg max-w-md">
               {isLoggedIn
@@ -137,7 +120,7 @@ export default function AuthPage() {
         </AnimatePresence>
       </motion.div>
 
-      {/* Form Section */}
+      {/* Right Panel */}
       <div className="flex justify-center items-center px-6 py-12">
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
@@ -150,91 +133,66 @@ export default function AuthPage() {
           </h2>
 
           <AnimatePresence mode="wait">
-            {!isLoggedIn ? (
-              <motion.form
-                key="signup"
-                variants={transitionVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="flex flex-col gap-5"
-                onSubmit={handleFormSubmit}
-              >
-                <Input
-                  label="Full Name"
-                  name="name"
-                  placeholder="Clay Jensen"
-                  onChange={handleChange}
-                  error={formErrors.name}
-                />
-                <Input
-                  label="Username"
-                  name="username"
-                  placeholder="JensenClay123"
-                  minLength={5}
-                  onChange={handleChange}
-                  error={formErrors.username}
-                />
-                <Input
-                  label="Email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  onChange={handleChange}
-                  error={formErrors.email}
-                />
-                <Input
-                  label="Password"
-                  name="password"
-                  type="password"
-                  placeholder="At least 8 characters"
-                  minLength={8}
-                  onChange={handleChange}
-                  error={formErrors.password}
-                />
+            <motion.form
+              key={isLoggedIn ? "login" : "signup"}
+              variants={transitionVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="flex flex-col gap-5"
+              onSubmit={handleFormSubmit}
+            >
+              {!isLoggedIn && (
+                <>
+                  <Input
+                    label="Full Name"
+                    name="name"
+                    placeholder="Clay Jensen"
+                    onChange={handleChange}
+                    error={fieldErrors.name}
+                  />
+                  <Input
+                    label="Username"
+                    name="username"
+                    placeholder="JensenClay123"
+                    minLength={5}
+                    onChange={handleChange}
+                    error={fieldErrors.username}
+                  />
+                </>
+              )}
+
+              <Input
+                label="Email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                onChange={handleChange}
+                error={fieldErrors.email}
+              />
+              <Input
+                label="Password"
+                name="password"
+                type="password"
+                placeholder={isLoggedIn ? "••••••••" : "At least 8 characters"}
+                minLength={8}
+                onChange={handleChange}
+                error={fieldErrors.password}
+              />
+              {!isLoggedIn && (
                 <Input
                   label="Confirm Password"
                   name="confirmPassword"
                   type="password"
                   placeholder="Confirm password"
                   onChange={handleChange}
-                  error={formErrors.confirmPassword}
+                  error={fieldErrors.confirmPassword}
                 />
+              )}
 
-                <AuthButton text="Sign Up" />
-                <SwitchLink isLogin={isLoggedIn} setIsLogin={setIsLoggedIn} />
-              </motion.form>
-            ) : (
-              <motion.form
-                key="login"
-                variants={transitionVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="flex flex-col gap-5"
-                onSubmit={handleFormSubmit}
-              >
-                <Input
-                  label="Email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  onChange={handleChange}
-                  error={formErrors.email}
-                />
-                <Input
-                  label="Password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  onChange={handleChange}
-                  error={formErrors.password}
-                />
-
-                <AuthButton text="Login" />
-                <SwitchLink isLogin={isLoggedIn} setIsLogin={setIsLoggedIn} />
-              </motion.form>
-            )}
+              <AuthButton text={isLoggedIn ? "Login" : "Sign Up"} loading={loading} />
+              <SwitchLink isLogin={isLoggedIn} setIsLogin={setIsLoggedIn} />
+            </motion.form>
           </AnimatePresence>
         </motion.div>
       </div>
@@ -242,14 +200,7 @@ export default function AuthPage() {
   );
 }
 
-function Input({
-  label,
-  type = "text",
-  placeholder,
-  onChange,
-  error,
-  ...props
-}) {
+function Input({ label, type = "text", placeholder, onChange, error, ...props }) {
   return (
     <div className="relative">
       <input
@@ -257,10 +208,8 @@ function Input({
         placeholder={placeholder}
         onChange={onChange}
         {...props}
-        error={error}
         className="w-full px-4 py-3 text-sm text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-800"
       />
-
       <label className="absolute left-4 -top-2 text-xs bg-white px-1 text-gray-500">
         {label}
       </label>
@@ -269,14 +218,13 @@ function Input({
   );
 }
 
-function AuthButton({ text }) {
+function AuthButton({ text, loading }) {
   const isOnline = useSelector((state) => state.app.isOnline);
-
   return (
     <button
       type="submit"
       className="w-full py-2.5 bg-blue-800 hover:bg-blue-900 disabled:bg-opacity-60 text-white rounded-md text-sm font-medium transition"
-      disabled={!isOnline}
+      disabled={!isOnline || loading}
     >
       {text}
     </button>

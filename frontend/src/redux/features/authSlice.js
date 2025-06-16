@@ -9,12 +9,10 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authApi.login(credentials);
-      toast.success("Login successful");
       return response.data.user;
-    } catch (err) {
-      const message = err?.response?.data?.message || "Login failed";
-      toast.error(message);
-      return rejectWithValue(message);
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: "Login Failed." }
+      );
     }
   }
 );
@@ -24,12 +22,9 @@ export const registerUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authApi.register(credentials);
-      toast.success("Registration successful");
       return response.data;
-    } catch (err) {
-      const message = err?.response?.data?.message || "Registration failed";
-      toast.error(message);
-      return rejectWithValue(message);
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: "Registration Failed." });
     }
   }
 );
@@ -40,11 +35,8 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authApi.logout();
-      toast.success("Logout successful");
-    } catch (err) {
-      const message = err?.response?.data?.message || "Logout failed";
-      toast.error(message);
-      return rejectWithValue(message);
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -54,10 +46,9 @@ export const refreshUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await authApi.refreshToken();
-      // console.log("refreshUser response", res);
       return res.data.user;
-    } catch (err) {
-      return rejectWithValue(err?.response?.data?.message || "Refresh failed");
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -72,8 +63,8 @@ export const getMe = createAsyncThunk(
     try {
       const res = await usersApi.getMe();
       return res.data.user;
-    } catch (err) {
-      return rejectWithValue(err?.response?.data?.message || "Fetch user failed");
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -82,8 +73,9 @@ export const getMe = createAsyncThunk(
 
 const initialState = {
   user: null,
-  isLoading: false,
-  error: null,
+  loading: false,
+  fieldErrors: {},
+  errorMessage: null,
   authChecked: false,
 };
 
@@ -93,91 +85,108 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-
+    clearFieldErrors: (state) => { state.fieldErrors = {}; state.errorMessage = null; },
   },
   extraReducers: (builder) => {
     builder
       // Login
       .addCase(loginUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.loading = true;
+        state.fieldErrors = {};
+        state.errorMessage = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loading = false;
         state.user = action.payload;
         state.authChecked = true;
+        state.fieldErrors = {};
+        state.errorMessage = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
+        state.loading = false;
+        state.fieldErrors = action.payload.errors || {};
+        state.errorMessage = action.payload.message || "Login Failed";
       })
 
       // Handle register thunk
       .addCase(registerUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.loading = true;
+        state.fieldErrors = {};
+        state.errorMessage = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload.user;
+        state.loading = false;
+        state.user = action.payload;
+        state.authChecked = true;
+        state.fieldErrors = {};
+        state.errorMessage = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
+        state.loading = false;
+        state.fieldErrors = action.payload.errors || {};
+        state.errorMessage = action.payload.message || "Registration Failed";
       })
 
       // Logout
       .addCase(logoutUser.pending, (state) => {
-        state.isLoading = true;
+        state.loading = true;
+        state.fieldErrors = {},
+        state.errorMessage = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        state.isLoading = false;
+        state.loading = false;
         state.user = null;
         state.authChecked = true;
-        state.error = null;
+        state.fieldErrors = {};
+        state.errorMessage = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
+        state.loading = false;
+        state.fieldErrors = {};
+        state.errorMessage = action.payload;
       })
 
       // Refresh
       .addCase(refreshUser.pending, (state) => {
-        state.isLoading = true;
+        state.loading = true;
+        state.fieldErrors = {},
+        state.errorMessage = null;
       })
       .addCase(refreshUser.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loading = false;
         state.user = action.payload;
         state.authChecked = true;
       })
       .addCase(refreshUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
+        state.loading = false;
+        state.errorMessage = action.payload;
         state.authChecked = true;
       })
 
       // GetMe
       .addCase(getMe.pending, (state) => {
-        state.isLoading = true;
+        state.loading = true;
+        state.errorMessage = null;
+        state.fieldErrors = {};
       })
       .addCase(getMe.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loading = false;
         state.user = action.payload;
         state.authChecked = true;
       })
       .addCase(getMe.rejected, (state, action) => {
         if (action.payload === "offline") {
-          state.isLoading = false;
+          state.loading = false;
           return;  // don't reset user or show error
         }
-        state.isLoading = false;
+        state.loading = false;
         state.user = null; // in case token expired
         state.authChecked = true;
-        state.error = action.payload;
+        state.errorMessage = action.payload;
       })
   },
 });
 
 
-export const { setUser, clearAuthState } = authSlice.actions;
+export const { clearFieldErrors } = authSlice.actions;
 export default authSlice.reducer;

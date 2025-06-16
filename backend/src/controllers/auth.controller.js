@@ -28,13 +28,17 @@ export const registerUser = async (req, res) => {
     const { isValid, errors } = validateSignUpData({ name, username, email, password, confirmPassword });
 
     if (!isValid) {
-      return res.status(400).json({ success: false, errors });
+      return res.status(400).json({ success: false, message: "Validation Failed", errors });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
 
     if (existingUser) {
-      return res.status(409).json({ message: "User already exists" });
+      return res.status(409).json({
+        success: false,
+        message: "User already exists",
+        errors: { email: "An account with this email already exists" }
+      });
     }
 
     const user = await User.create({
@@ -67,149 +71,179 @@ export const registerUser = async (req, res) => {
  */
 
 export const loginUser = async (req, res) => {
-  try {
     const { email, username, password } = req.body;
 
     if (!email && !username) {
-      return res.status(400).json({ error: "Email or username is required" });
-    }
-
-    const user = await User.findOne({ $or: [{ email }, { username }] });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const { accessToken, refreshToken } = await generateTokens(user);
-
-    const cleanUser = await User.findById(user._id).select("-password -refreshToken");
-
-    res
-      .status(200)
-      .cookie("accessToken", accessToken, { httpOnly: true, sameSite: "none", secure: true })
-      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", secure: true })
-      .json({ message: 'User logged in successfully', user: cleanUser, accessToken, refreshToken });
-  } catch (error) {
-    res.status(500).json({ message: "Login failed", error: error.message });
-  }
-};
-
-
-/**
- * @desc    Log out a user
- * @route   POST /auth/logout
- * @access  Private
- */
-
-export const logoutUser = async (req, res) => {
-  try {
-    await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } });
-    res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" });
-  } catch (error) {
-    res.status(500).json({ message: "Logout failed", error: error.message });
-  }
-};
-
-
-/**
- * @desc    Refresh access token using valid refresh token
- * @route   GET /auth/refresh
- * @access  Public
- */
-
-export const refreshAccessToken = async (req, res) => {
-  try {
-    const token = req.cookies.refreshToken || req.body.refreshToken;
-    if (!token) return res.status(401).json({ message: "Token missing" });
-
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET_KEY);
-    const user = await User.findById(decoded._id);
-    console.log(user);
-    if (!user || user.refreshToken !== token) {
-      return res.status(403).json({ message: "Invalid or expired token" });
-    }
-
-    const { accessToken, refreshToken } = await generateTokens(user);
-    res
-      .cookie("accessToken", accessToken, { httpOnly: true, sameSite: "none", secure: true })
-      .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", secure: true })
-      .json({
-        accessToken,
-        refreshToken,
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
+      return res.status(400).json({
+        success: false,
+        message: "Login failed",
+        errors: {
+          email: "Email or username is required",
+          username: "Email or username is required",
         },
       });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to refresh token", error: error.message });
-  }
-};
+    }
+
+    try {
+      const user = await User.findOne({ $or: [{ email }, { username }] });
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "Login failed",
+          errors: {
+            email: "User not found",
+            username: "User not found",
+          },
+        });
+      }
+
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: "Login failed",
+          errors: {
+            password: "Incorrect password",
+          },
+        });
+      }
+
+      const { accessToken, refreshToken } = await generateTokens(user);
+      const cleanUser = await User.findById(user._id).select("-password -refreshToken");
+
+      return res
+        .status(200)
+        .cookie("accessToken", accessToken, { httpOnly: true, sameSite: "none", secure: true })
+        .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", secure: true })
+        .json({
+          success: true,
+          message: "Logged in successfully",
+          user: cleanUser,
+          accessToken,
+          refreshToken,
+        });
+
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Login failed",
+        error: error.message,
+      });
+    }
+  };
 
 
-/**
- * @desc    Update user's password
- * @route   PUT /auth/update-password
- * @access  Private
- */
+  /**
+   * @desc    Log out a user
+   * @route   POST /auth/logout
+   * @access  Private
+   */
 
-export const changePassword = async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-    const user = await User.findById(req.user._id);
-
-    const isMatch = await user.isPasswordCorrect(oldPassword);
-    if (!isMatch) return res.status(400).json({ message: "Incorrect old password" });
-
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ message: "Password updated successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Password update failed", error: error.message });
-  }
-};
+  export const logoutUser = async (req, res) => {
+    try {
+      await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } });
+      res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" });
+    } catch (error) {
+      res.status(500).json({ message: "Logout failed", error: error.message });
+    }
+  };
 
 
-/**
- * @desc    Update user's account details
- * @route   PUT /auth/update-account-details
- * @access  Private
- */
+  /**
+   * @desc    Refresh access token using valid refresh token
+   * @route   GET /auth/refresh
+   * @access  Public
+   */
 
-export const updateAccountDetails = async (req, res) => {
-  try {
-    const { fullName, email } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { fullName, email },
-      { new: true }
-    ).select("-password");
+  export const refreshAccessToken = async (req, res) => {
+    try {
+      const token = req.cookies.refreshToken || req.body.refreshToken;
+      if (!token) return res.status(401).json({ message: "Token missing" });
 
-    res.json({ user });
-  } catch (error) {
-    res.status(500).json({ message: "Update failed", error: error.message });
-  }
-};
+      const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET_KEY);
+      const user = await User.findById(decoded._id);
+      console.log(user);
+      if (!user || user.refreshToken !== token) {
+        return res.status(403).json({ message: "Invalid or expired token" });
+      }
+
+      const { accessToken, refreshToken } = await generateTokens(user);
+      res
+        .cookie("accessToken", accessToken, { httpOnly: true, sameSite: "none", secure: true })
+        .cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", secure: true })
+        .json({
+          accessToken,
+          refreshToken,
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
+        });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to refresh token", error: error.message });
+    }
+  };
 
 
-/**
- * @desc    Delete user's account
- * @route   DELETE /auth/delete-account
- * @access  Private
- */
+  /**
+   * @desc    Update user's password
+   * @route   PUT /auth/update-password
+   * @access  Private
+   */
 
-export const deleteAccount = async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.user._id);
-    res.json({ message: "Account deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Delete failed", error: error.message });
-  }
-};
+  export const changePassword = async (req, res) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const user = await User.findById(req.user._id);
+
+      const isMatch = await user.isPasswordCorrect(oldPassword);
+      if (!isMatch) return res.status(400).json({ message: "Incorrect old password" });
+
+      user.password = newPassword;
+      await user.save();
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Password update failed", error: error.message });
+    }
+  };
+
+
+  /**
+   * @desc    Update user's account details
+   * @route   PUT /auth/update-account-details
+   * @access  Private
+   */
+
+  export const updateAccountDetails = async (req, res) => {
+    try {
+      const { fullName, email } = req.body;
+      const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { fullName, email },
+        { new: true }
+      ).select("-password");
+
+      res.json({ user });
+    } catch (error) {
+      res.status(500).json({ message: "Update failed", error: error.message });
+    }
+  };
+
+
+  /**
+   * @desc    Delete user's account
+   * @route   DELETE /auth/delete-account
+   * @access  Private
+   */
+
+  export const deleteAccount = async (req, res) => {
+    try {
+      await User.findByIdAndDelete(req.user._id);
+      res.json({ message: "Account deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Delete failed", error: error.message });
+    }
+  };
