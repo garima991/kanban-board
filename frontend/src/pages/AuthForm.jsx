@@ -190,7 +190,7 @@ export default function AuthPage() {
                 />
               )}
 
-              <AuthButton text={isLoggedIn ? "Login" : "Sign Up"} loading={loading} />
+              <AuthButton text={isLoggedIn ? "Login" : "Sign Up"} />
               <SwitchLink isLogin={isLoggedIn} setIsLogin={setIsLoggedIn} />
             </motion.form>
           </AnimatePresence>
@@ -218,13 +218,13 @@ function Input({ label, type = "text", placeholder, onChange, error, ...props })
   );
 }
 
-function AuthButton({ text, loading }) {
+function AuthButton({ text}) {
   const isOnline = useSelector((state) => state.app.isOnline);
   return (
     <button
       type="submit"
       className="w-full py-2.5 bg-blue-800 hover:bg-blue-900 disabled:bg-opacity-60 text-white rounded-md text-sm font-medium transition"
-      disabled={!isOnline || loading}
+      disabled={!isOnline }
     >
       {text}
     </button>
