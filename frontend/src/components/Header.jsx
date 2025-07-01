@@ -8,8 +8,11 @@ import toast from "react-hot-toast";
 import {
   addBoardMember,
   getActiveBoardMembers,
+  updateBoard,
 } from "../redux/features/boardSlice";
 import { GoListUnordered, GoPersonAdd } from "react-icons/go";
+import NewBoardModal from "../modals/NewBoardModal";
+import { FiEdit2 } from "react-icons/fi";
 
 const Header = ({ activeView, setActiveView }) => {
   const dispatch = useDispatch();
@@ -24,6 +27,7 @@ const Header = ({ activeView, setActiveView }) => {
   const [userDropdown, setUserDropdown] = useState([]);
   const [inviteInput, setInviteInput] = useState("");
   const [showUsers, setShowUsers] = useState(false);
+  const [showEditBoard, setShowEditBoard] = useState(false);
 
   // Fetch all users
   const fetchAllUsers = async () => {
@@ -84,12 +88,29 @@ const Header = ({ activeView, setActiveView }) => {
     if (names.length === 1) return names[0][0].toUpperCase();
     return (names[0][0] + names[names.length - 1][0]).toUpperCase();
   };
-  
+
+  // Handler for updating board
+  const handleUpdateBoard = async (newName) => {
+    if (!activeBoard?._id) return;
+    dispatch(updateBoard({ boardId: activeBoard._id, name: newName }));
+    setShowEditBoard(false);
+  };
+
   return (
-    <div className="px flex flex-col gap-1 bg-white text-black border-b-2 border-gray-300">
-      <div className="flex justify-between items-center w-full bg-blue-100 py-3 px-4 rounded-md">
-        <h1 className="text-4xl font-bold rounded-xl">{boardName}</h1>
-        <div className="flex items-center gap-2">
+    <div className="px-2 flex flex-col gap-1 bg-white text-black border-b-2 border-gray-300 z-60">
+      <div className="flex flex-col md:flex-row justify-between items-center w-full bg-blue-100 py-3 px-4 rounded-md gap-4">
+        <h1 className="text-4xl font-bold rounded-xl flex items-start">
+          {boardName}
+          {activeBoard?.admin === user._id && (
+            <button
+              className="p-2 text-gray-500 hover:text-black rounded"
+              onClick={() => setShowEditBoard(true)}
+            >
+              <FiEdit2 className="size-4" />
+            </button>
+          )}
+        </h1>
+        <div className="flex items-center gap-2 ">
           <div className="flex -space-x-2">
             {boardMembers?.map((user) => (
               <span
@@ -101,14 +122,14 @@ const Header = ({ activeView, setActiveView }) => {
               </span>
             ))}
           </div>
-          
+
           {activeBoard?.admin === user._id && (
             <button
               className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed"
               onClick={() => setShowUsers(!showUsers)}
               disabled={!isOnline}
             >
-              <GoPersonAdd /> Invite
+              <GoPersonAdd /> <span className="hidden xs:inline">Invite</span>
             </button>
           )}
           {showUsers && (
@@ -155,7 +176,7 @@ const Header = ({ activeView, setActiveView }) => {
       <hr />
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6 px-3">
+        <div className="flex items-center gap-6 px-3 py-2">
           <div className="flex items-center gap-1 ">
             <LuLayoutDashboard />
             <Button
@@ -178,12 +199,27 @@ const Header = ({ activeView, setActiveView }) => {
         </div>
 
         {/* Search & Add Task */}
-        <div className="flex items-center gap-1 p-2">
+        <div className="sm:flex items-center gap-1 p-2 hidden ">
           {/* <TaskModalProvider> */}
-            <AddTaskButton />
+          <AddTaskButton />
           {/* </TaskModalProvider> */}
         </div>
       </div>
+
+      {showEditBoard && (
+        <div
+          className="fixed bg-slate-900/30 p-8 inset-0 z-50 grid place-items-center cursor-pointer"
+          onClick={() => setShowEditBoard(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <NewBoardModal
+              initialName={activeBoard?.name || ""}
+              submitText="Update Board"
+              onSubmit={handleUpdateBoard}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -206,4 +242,3 @@ const Button = ({ children, isActive, onClick }) => {
 };
 
 export default Header;
-

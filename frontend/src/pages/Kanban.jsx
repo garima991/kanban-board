@@ -38,7 +38,7 @@ const Kanban = () => {
   }
 
   return board ? ( 
-    <div className="flex flex-row gap-4 py-2">
+    <div className="sm:flex sm:flex-row md:grid md:grid-cols-2 xl:grid-cols-4 gap-4 py-[1px]">
       {columns.map((col, index) => (
         <Column
           key={col._id || index}

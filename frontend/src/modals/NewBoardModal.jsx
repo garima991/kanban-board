@@ -1,17 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { useBoardModal } from "../contexts/BoardModalContext";
+import {useBoardModal} from "../contexts/BoardModalContext"
 import { useDispatch } from "react-redux";
 import { createBoard } from "../redux/features/boardSlice";
 
-const NewBoardModal = () => {
+const NewBoardModal = ({ initialName = "", onSubmit, submitText = "Create Board" }) => {
   const { setBoardFormOpen } = useBoardModal();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialName);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setName(initialName);
+  }, [initialName]);
 
   const validateForm = () => {
     if (name.trim() === "") {
-      toast.error("Please fill all the details")
+      toast.error("Please fill all the details");
       return false;
     }
     return true;
@@ -20,10 +24,11 @@ const NewBoardModal = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
-    dispatch(createBoard(
-      {name}
-    ));
+    if (onSubmit) {
+      await onSubmit(name);
+    } else {
+      dispatch(createBoard({ name }));
+    }
     setBoardFormOpen(false);
   };
 
@@ -47,7 +52,7 @@ const NewBoardModal = () => {
         className="p-1 bg-blue-900 rounded-lg text-white"
         onClick={handleSubmit}
       >
-        Create Board
+        {submitText}
       </button>
     </div>
   );

@@ -44,8 +44,8 @@ const TaskCard = ({ task, onTaskClick }) => {
 
   return (
     <div
-      className={`w-full flex flex-col gap-2 bg-white shadow-lg p-3 rounded-md border-l-4 border-blue-300 hover:shadow-xl transition-all duration-200 ease-in-out cursor-${
-        isOnline ? "grabb" : "not-allowed"
+      className={`w-full flex flex-col gap-2 bg-white shadow-lg p-3 rounded-md border-[1.5px] border-gray-300 border-l-4 border-l-blue-300 hover:shadow-xl transition-all duration-200 ease-in-out cursor-${
+        isOnline ? "grab" : "not-allowed"
       }`}
       draggable={isOnline}
       onDragStart={handleDrag}
