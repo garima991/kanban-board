@@ -10,15 +10,17 @@ const Dashboard = () => {
   const user = useSelector((state) => state.auth.user);
 
   return (
-    <div className="w-full flex flex-col justify-between p-2 bg-white">
-      <div className="sticky left-0 top-2 bg-white z-10">
+    <div className="w-full flex flex-col justify-between py-0 p-2 bg-white dark:bg-[#0E1118]">
+      <div className="sticky left-0 top-0 bg-white dark:bg-[#0E1118] z-10">
         <Header activeView={activeView} setActiveView={setActiveView} />
       </div>
+      {/* <div className="overflow-y-scroll"> */}
       {activeView === "kanban" ? (
           <Kanban />
       ) : (
         <ListView />
       )}
+      {/* </div> */}
     </div>
   );
 };

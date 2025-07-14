@@ -40,7 +40,7 @@ const Sidebar = () => {
   return (
     <motion.nav
       layout
-      className="sticky shrink-0 border-r border-slate-300 bg-white p-2 z-20 h-screen"
+      className="sticky shrink-0 border-r border-slate-300 dark:border-gray-500 bg-white dark:bg-[#0E1118] dark:text-white p-2 z-20 h-screen"
       style={{
         width: open ? "225px" : "fit-content",
       }}
@@ -89,8 +89,8 @@ const Option = ({ Icon, title, isActive, setIsActive , open, setBoardForm}) => {
       title
       className={`relative flex h-10 w-full items-center rounded-md transition-colors ${
         isActive
-          ? "bg-blue-100 text-blue-700"
-          : "text-slate-500 hover:bg-slate-100"
+          ? "bg-blue-100 text-blue-700 dark:bg-[#222830] dark:text-gray-200"
+          : "text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#222830] dark:hover:text-slate-50"
       }`}
     >
       <motion.div layout className="flex w-10 justify-center text-lg">
@@ -137,7 +137,7 @@ const Logo = () => {
   return (
     <motion.div
       layout
-      className="grid size-10 shrink-0 place-content-center rounded-md bg-blue-900"
+      className="grid size-10 shrink-0 place-content-center rounded-md bg-blue-900 dark:bg-[#121212] text-white"
     >
       <img src = {taskoraIcon} alt = "logo"/>
     </motion.div>
@@ -149,7 +149,7 @@ const ToggleClose = ({ open, setOpen }) => {
     <motion.button
       layout
       onClick={() => setOpen((pv) => !pv)}
-      className="absolute bottom-0 left-0 right-0 border-t border-slate-300 transition-colors hover:bg-slate-100"
+      className="absolute bottom-0 left-0 right-0 border-t border-slate-300 transition-colors hover:bg-slate-100 dark:hover:text-gray-50 dark:hover:bg-[#141415]"
     >
       <div className="flex items-center p-2">
         <motion.div
@@ -189,7 +189,7 @@ const AddBoardModal = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setBoardFormOpen(false)}
-          className="fixed bg-slate-900/30 p-8 inset-0 z-50 grid place-items-center cursor-pointer"
+          className="fixed bg-slate-700/30 p-8 inset-0 z-50 grid place-items-center cursor-pointer opacity-1"
           disable={!isOnline}
         >
          <NewBoardModal />

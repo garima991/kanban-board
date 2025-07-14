@@ -34,13 +34,13 @@ const NewBoardModal = ({ initialName = "", onSubmit, submitText = "Create Board"
 
   return (
     <div
-      className="flex flex-col gap-4 p-8 bg-white rounded-lg shadow-lg z-50"
+      className="flex flex-col gap-4 p-8 bg-white dark:bg-[#0E1118] dark:text-[#e8e8eb] rounded-lg shadow-lg z-50"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex flex-col space-y-1">
         {/* <label className=" text-md text-left text-gray-900">Board Name</label> */}
         <input
-          className=" bg-white px-4 py-2 rounded-md text-sm border-[0.5px] border-gray-600 focus:outline-[#635fc7] outline-1  ring-0  "
+          className=" bg-white dark:bg-[#171C22] px-4 py-2 rounded-md text-sm border-[0.5px] border-gray-600 focus:outline-[#635fc7] outline-1  ring-0  "
           placeholder="Board Name"
           value={name}
           onChange={(e) => setName(e.target.value)}

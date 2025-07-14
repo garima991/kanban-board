@@ -1,6 +1,6 @@
 import express from  'express';
 import {verifyJWT} from '../middleware/auth.middleware.js';
-import { addSubtask, assignTask, changeTaskStatus, createTask, deleteSubtask, deleteTask, getTaskById, getTasksByBoard, removeTaskMember, updateSubtask, updateTask } from '../controllers/task.controller.js';
+import { addSubtask, assignTask, changeTaskStatus, createTask, deleteSubtask, deleteTask, getTaskById, getTasksByBoard, removeTaskMember, updateSubtask, updateTask, addComment } from '../controllers/task.controller.js';
 import { isBoardAdmin, isBoardMember, isTaskMember, isTaskOrBoardAdmin } from '../middleware/role.middleware.js';
 
 const app = express.Router();
@@ -26,5 +26,7 @@ app.post('/:boardId/tasks/:taskId/assign', verifyJWT, isTaskOrBoardAdmin, assign
 app.delete('/:boardId/tasks/:taskId/assign/:userId', verifyJWT, isTaskOrBoardAdmin, removeTaskMember);
 
 app.patch('/:boardId/tasks/:taskId/status', verifyJWT, isTaskMember, changeTaskStatus);
+
+app.post('/:boardId/tasks/:taskId/comments', verifyJWT, isTaskMember, addComment);
 
 export default app;

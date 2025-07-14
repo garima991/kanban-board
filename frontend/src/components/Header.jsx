@@ -9,10 +9,27 @@ import {
   addBoardMember,
   getActiveBoardMembers,
   updateBoard,
+  removeBoardMember,
 } from "../redux/features/boardSlice";
 import { GoListUnordered, GoPersonAdd } from "react-icons/go";
 import NewBoardModal from "../modals/NewBoardModal";
-import { FiEdit2 } from "react-icons/fi";
+import { FiEdit2, FiSun, FiMoon } from "react-icons/fi";
+import { setTheme } from "../redux/features/appSlice";
+
+const ThemeToggle = () => {
+  const dispatch = useDispatch();
+  const theme = useSelector((state) => state.app.theme);
+
+  return (
+    <button
+      onClick={() => dispatch(setTheme(theme === "dark" ? "light" : "dark"))}
+      className="ml-2 px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
+      title="Toggle theme"
+    >
+      {theme === "dark" ? <FiSun className="w-5 h-5 " /> : <FiMoon className="w-5 h-5 text-black" />}
+    </button>
+  );
+};
 
 const Header = ({ activeView, setActiveView }) => {
   const dispatch = useDispatch();
@@ -97,28 +114,37 @@ const Header = ({ activeView, setActiveView }) => {
   };
 
   return (
-    <div className="px-2 flex flex-col gap-1 bg-white text-black border-b-2 border-gray-300 z-60">
-      <div className="flex flex-col md:flex-row justify-between items-center w-full bg-blue-100 py-3 px-4 rounded-md gap-4">
-        <h1 className="text-4xl font-bold rounded-xl flex items-start">
+    <div className="top-0 px-2 flex flex-col gap-1 bg-white dark:bg-[#0E1118] text-black dark:text-white border-b-2 border-gray-300 z-6">
+      <div className="flex flex-col md:flex-row justify-between items-center w-full bg-blue-100 dark:bg-[#0E1118] py-3 px-4 rounded-md xs:gap-2 md:gap-4">
+        <h1 className="xs:text-3xl sm:text-4xl font-bold rounded-xl flex items-start xs:py-4 sm:py-1 truncate">
           {boardName}
           {activeBoard?.admin === user._id && (
             <button
-              className="p-2 text-gray-500 hover:text-black rounded"
+              className="p-2 text-gray-500 hover:text-black dark:hover:text-gray-200 rounded"
               onClick={() => setShowEditBoard(true)}
             >
               <FiEdit2 className="size-4" />
             </button>
           )}
         </h1>
-        <div className="flex items-center gap-2 ">
+        <div className="flex items-center gap-2">
           <div className="flex -space-x-2">
-            {boardMembers?.map((user) => (
+            {boardMembers?.map((member) => (
               <span
-                key={user._id}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ring-2 ring-white bg-blue-100 text-blue-800"
-                title={user.name}
+                key={member._id}
+                className="size-8 rounded-full flex items-center justify-center text-xs font-bold ring-1 ring-white dark:ring-gray-300 bg-blue-50 dark:bg-gray-900 text-blue-900 dark:text-gray-300 relative group"
+                title={member.name}
               >
-                {getInitials(user.name)}
+                {getInitials(member.name)}
+                {activeBoard?.admin === user._id && member._id !== user._id && (
+                  <button
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                    title="Remove from board"
+                    onClick={() => dispatch(removeBoardMember({ boardId: activeBoard._id, memberId: member._id }))}
+                  >
+                    ×
+                  </button>
+                )}
               </span>
             ))}
           </div>
@@ -171,6 +197,7 @@ const Header = ({ activeView, setActiveView }) => {
               </div>
             </>
           )}
+          <ThemeToggle />
         </div>
       </div>
       <hr />
@@ -231,7 +258,7 @@ const Button = ({ children, isActive, onClick }) => {
       className={`flex flex-row justify-center items-center gap-2 font-medium text-md
         ${
           isActive
-            ? "border-black border-b-2"
+            ? "border-black border-b-2 dark:border-gray-400 "
             : "border-transparent hover:border-b-2 hover:border-gray-200"
         } 
         transition-all duration-200`}

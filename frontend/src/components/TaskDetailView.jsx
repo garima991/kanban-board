@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { boardsApi, tasksApi, usersApi } from "../apis/axiosInstance";
-import toast from "react-hot-toast";
 import {
   FaCalendar,
   FaCircleNotch,
@@ -11,8 +9,8 @@ import { GoPeople } from "react-icons/go";
 import SubtasksSection from "./SubtasksSection";
 import {
   assignTask,
-  fetchTasks,
   updateTask,
+  removeTaskMember,
 } from "../redux/features/taskSlice";
 import { useDispatch, useSelector } from "react-redux";
 import AddTaskForm from "../modals/AddTaskForm";
@@ -79,22 +77,32 @@ const TaskDetailView = ({ open, onClose, task }) => {
         taskData,
       })
     );
+    setShowEditModal(false);
   };
+
+  const handleRemoveTaskMember = async (e) => {
+    e.stopPropagation();
+    dispatch(removeTaskMember({
+      boardId: task.boardId,
+      taskId: task._id,
+      userId: user._id,
+    }));
+  }
 
   if (!open || !task) return null;
 
   return (
     <div
-      className="fixed bg-slate-900/30 inset-0 z-50 flex items-center justify-center"
+      className="fixed bg-slate-600/30 inset-0 z-50 flex items-center justify-center"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-xl relative overflow-y-auto max-h-[95vh] gap-2"
+        className="bg-white dark:bg-[#0F131E] rounded-2xl w-full max-w-xl relative overflow-y-auto max-h-[95vh] gap-2"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Section */}
         <div className="px-8 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold italic p-3">{task.title}</h2>
+          <h2 className="text-2xl font-bold italic p-3 dark:text-white">{task.title}</h2>
           <div className="flex flex-row items-center gap-2">
             <button
               className="p-1 text-gray-400 hover:text-gray-800 hover:bg-gray-200 rounded flex items-center gap-1"
@@ -110,7 +118,7 @@ const TaskDetailView = ({ open, onClose, task }) => {
             >
               &times;
             </button>
-            
+
           </div>
         </div>
         <div className="px-8 flex flex-col gap-3">
@@ -121,7 +129,7 @@ const TaskDetailView = ({ open, onClose, task }) => {
               <FaCircleNotch className="text-gray-500" />
               Status{" "}
             </h3>
-            <span className="flex items-center text-sm font-medium gap-2 text-blue-800">
+            <span className="flex items-center text-sm font-medium gap-2 text-blue-800 dark:text-blue-400">
               {task.status}
             </span>
           </div>
@@ -129,7 +137,7 @@ const TaskDetailView = ({ open, onClose, task }) => {
           <div className="flex items-center text-sm text-gray-500 gap-2">
             <FaCalendar className="text-gray-500" />
             Due date{" "}
-            <span className="font-medium text-black ml-8">
+            <span className="font-medium text-black ml-8 dark:text-white">
               {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "-"}
             </span>
           </div>
@@ -144,10 +152,17 @@ const TaskDetailView = ({ open, onClose, task }) => {
               {assignees?.map((user) => (
                 <span
                   key={user._id}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ring-2 ring-white bg-blue-100 text-blue-800"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ring-2 ring-white bg-blue-100 text-blue-800 relative z-10 hover:z-50 cursor-pointer group"
                   title={user.name}
                 >
                   {getInitials(user.name)}
+                  <button
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove from task"
+                    onClick={handleRemoveTaskMember}
+                  >
+                    x
+                  </button>
                 </span>
               ))}
             </div>
@@ -219,13 +234,12 @@ const TaskDetailView = ({ open, onClose, task }) => {
               ))}
             </div>
             <span
-              className={`px-2 py-1 text-xs ${
-                task.priority === "High"
+              className={`px-2 py-1 text-xs ${task.priority === "High"
                   ? "bg-red-100 text-red-700"
                   : task.priority === "Medium"
-                  ? "bg-orange-100 text-orange-700"
-                  : "bg-green-100 text-green-700"
-              } rounded flex items-center gap-1`}
+                    ? "bg-orange-100 text-orange-700"
+                    : "bg-green-100 text-green-700"
+                } rounded flex items-center gap-1`}
             >
               {task.priority}
             </span>
@@ -237,29 +251,27 @@ const TaskDetailView = ({ open, onClose, task }) => {
               <FaRegFileAlt className="text-gray-500" />
               Description{" "}
             </h3>
-            <div className="flex rounded p-3 text-gray-900 text-sm border-2 border-gray-200">
+            <div className="flex rounded p-3 text-gray-900 dark:text-white text-sm border-2 border-gray-200">
               {task.description || "No description provided."}
             </div>
           </div>
         </div>
         {/* Tabs */}
-        <div className="px-8 pt-4 pb-0 flex gap-8 border-b border-gray-100 bg-white sticky top-0 z-2">
+        <div className="px-8 pt-4 pb-0 flex gap-8 border-b border-gray-100 bg-white dark:bg-[#0F131E] sticky top-0 z-2">
           <button
-            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
-              activeTab === "subtasks"
-                ? "border-blue-700 text-blue-800"
-                : "border-transparent text-gray-500"
-            }`}
+            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${activeTab === "subtasks"
+                ? "border-blue-700 dark:border-blue-400 text-blue-800 dark:text-blue-500"
+                : "border-transparent text-gray-500 dark:text-gray-200"
+              }`}
             onClick={() => setActiveTab("subtasks")}
           >
             Subtasks
           </button>
           <button
-            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
-              activeTab === "comments"
+            className={`pb-2 text-sm font-semibold border-b-2 transition-all ${activeTab === "comments"
                 ? "border-blue-700 text-blue-800"
-                : "border-transparent text-gray-500"
-            }`}
+                : "border-transparent text-gray-500 dark:text-gray-200"
+              }`}
             onClick={() => setActiveTab("comments")}
           >
             Comments
@@ -280,15 +292,14 @@ const TaskDetailView = ({ open, onClose, task }) => {
           className="fixed inset-0 bg-slate-900/30 z-50 flex items-center justify-center"
           onClick={() => setShowEditModal(false)}
         >
-          {/* <div onClick={(e) => e.stopPropagation()}>  */}
-            <AddTaskForm
-              initialTask={task}
-              onSubmit={async (taskData) => {
-                await handleEditTask(taskData);
-              }}
-            />
-           </div> 
-        //  </div>
+          <AddTaskForm
+            initialTask={task}
+            onSubmit={async (taskData) => {
+              await handleEditTask(taskData);
+            }}
+            onClose={() => setShowEditModal(false)}
+          />
+        </div>
       )}
     </div>
   );

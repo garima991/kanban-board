@@ -1,29 +1,41 @@
 import { motion } from "framer-motion";
 import { useTaskModal } from "../contexts/TaskModalContext";
 import { useSelector, useDispatch } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { tasksApi } from "../apis/axiosInstance.js";
 import toast from "react-hot-toast";
-import { fetchTasks } from "../redux/features/taskSlice.js";
+import { createTask } from "../redux/features/taskSlice.js";
 
-const AddTaskForm = () => {
+const AddTaskForm = ({ initialTask = null, onSubmit, onClose }) => {
   const { setTaskFormOpen } = useTaskModal();
   const board = useSelector((state) => state.kanban.value).find(
     (board) => board.isActive
   );
-  const boardId = board._id;
+  const boardId = board?._id;
   const dispatch = useDispatch();
 
-  const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [status, setStatus] = useState("To Do");
-  const [priority, setPriority] = useState("Medium");
-  const [tags, setTags] = useState("Web App"); // custom tags
-  const [description, setDescription] = useState("");
+  // If editing, prefill with initialTask, else defaults
+  const [title, setTitle] = useState(initialTask?.title || "");
+  const [dueDate, setDueDate] = useState(initialTask?.dueDate ? initialTask.dueDate.slice(0,10) : "");
+  const [status, setStatus] = useState(initialTask?.status || "To Do");
+  const [priority, setPriority] = useState(initialTask?.priority || "Medium");
+  const [tags, setTags] = useState(initialTask?.tags || "Web App");
+  const [description, setDescription] = useState(initialTask?.description || "");
   const validStatus = ["To Do", "On Progress", "In Review", "Completed"];
   const validPriorities = ["Low", "Medium", "High"];
   const validTags = ["Mobile App","Dashboard", "Web App"];
 
+  // Update state if initialTask changes (for edit mode)
+  useEffect(() => {
+    if (initialTask) {
+      setTitle(initialTask.title || "");
+      setDueDate(initialTask.dueDate ? initialTask.dueDate.slice(0,10) : "");
+      setStatus(initialTask.status || "To Do");
+      setPriority(initialTask.priority || "Medium");
+      setTags(initialTask.tags || "Web App");
+      setDescription(initialTask.description || "");
+    }
+  }, [initialTask]);
 
   const validateForm = () => {
     if (title.trim() === "") {
@@ -49,102 +61,92 @@ const AddTaskForm = () => {
     return true;
   }
 
-  const newTask = {
-    title,
-    description,
-    dueDate,
-    priority,
-    status,
-    tags,
-    color :  'blue-50',
-  }
-
   const handleSubmit = async () => {
     const isValid = validateForm();
     if (!isValid) return;
-    try{
-      await tasksApi.createTask(boardId, {
+    const taskData = {
       title,
       description,
       dueDate,
       priority,
       status,
       tags,
-      color :  'blue-50',
-
-      })
-      toast.success("Task Created Successfully !");
-      dispatch(fetchTasks(boardId))
+      color: initialTask?.color || 'blue-50',
+    };
+    try {
+      if (initialTask && onSubmit) {
+        // Edit mode: call onSubmit with updated data
+        await onSubmit(taskData);
+        // dispatch(fetchTasks(boardId));
+      } else {
+        // Add mode: create new task
+        await dispatch(createTask({boardId, taskData}));
+        setTaskFormOpen(false)
+        // dispatch(fetchTasks(boardId));
+      }
+    } catch (error) {
+      console.log("Error while saving task!", error);
     }
-    catch(error){
-      console.log("Error while creating task !", error);
-      toast.error("Error while creating task !");
-    }
-   
-    setTaskFormOpen(false);
+    if (onClose) onClose();
+    else setTaskFormOpen(false);
   };
 
   return (
     <motion.div
       animate={{ scale: 1}}
       exit={{ scale: 0}}
-      // transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={(e) => e.stopPropagation()}
       className="fixed text-white rounded-xl w-full max-w-lg shadow-xl cursor-default overflow-hidden"
     >
-      <div className="relative z-40 flex flex-col justify-center items-center gap-4 bg-[#FFFFFF]">
-        <h3 className="font-bold text-black text-2xl p-3">Add New Task</h3>
-
+      <div className="relative z-40 flex flex-col justify-center items-center gap-4 bg-[#FFFFFF] dark:bg-[#0E1118] dark:text-[#e8e8eb]">
+        <h3 className="font-bold text-black dark:text-[#DADADB] text-2xl p-3">
+          {initialTask ? "Edit Task" : "Add New Task"}
+        </h3>
         {/* title */}
         <input
           type="text"
           placeholder="Task Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
+          className="w-5/6 p-2 border-2 border-gray-400 dark:bg-[#171C22] rounded-lg text-black"
         />
-
         {/* due date */}
         <input
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
+          className="w-5/6 p-2 border-2 border-gray-400 dark:bg-[#171C22] rounded-lg text-black dark:text-[#e8e8eb]"
         />
-        
-
         <div className="flex justify-between items-center w-5/6 gap-2">
         {/* status */}
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
+          className="w-5/6 p-2 border-2 border-gray-400 dark:bg-[#171C22] rounded-lg text-black dark:text-[#e8e8eb]"
         >
           {validStatus.map((status, idx) => (
-            <option key={idx} value={status}>
+            <option key={idx} value={status} className="dark:bg-[#171C22] dark:text-[#e8e8eb]">
               {status}
             </option>
           ))}
         </select>
-
         {/* priority */}
         <select
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
-          className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
+          className="w-5/6 p-2 border-2 border-gray-400 dark:bg-[#171C22] rounded-lg text-black dark:text-[#e8e8eb]"
         >
           {validPriorities.map((priority, idx) => (
-            <option key={idx} value={priority}>
+            <option key={idx} value={priority} className="dark:bg-[#171C22] dark:text-[#e8e8eb]">
               {priority}
             </option>
           ))}
         </select>
-
         {/* tags */}
         <select
           value={tags}
           onChange={(e) => setTags(e.target.value)}
-          className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
+          className="w-5/6 p-2 border-2 border-gray-400 dark:bg-[#171C22] rounded-lg text-black dark:text-[#e8e8eb]"
         >
           {validTags.map((tags, idx) => (
             <option key={idx} value={tags}>
@@ -152,26 +154,20 @@ const AddTaskForm = () => {
             </option>
           ))}
         </select>
-
         </div>
-
-      
-      
-
         {/* Description */}
         <textarea
           placeholder="Task Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-5/6 p-2 border-2 border-gray-400 rounded-lg text-black"
+          className="w-5/6 p-2 border-2 border-gray-400 dark:bg-[#171C22] rounded-lg text-black"
         />
-
         {/* Submit Button */}
         <button
           onClick={handleSubmit}
           className="mt-2 mb-2 bg-blue-900 text-white font-normal p-2 rounded-md hover:scale-105"
         >
-          Add Task
+          {initialTask ? "Update Task" : "Add Task"}
         </button>
       </div>
     </motion.div>

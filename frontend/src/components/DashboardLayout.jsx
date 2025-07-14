@@ -6,7 +6,7 @@ import Dashboard from '../pages/Dashboard'
 const DashboardLayout = () => {
   return (
     <div className="flex flex-col h-screen">
-    <div className="flex flex-row flex-1 overflow-hidden">
+    <div className="flex flex-row flex-1 h-screen">
       <BoardModalProvider>
         <Sidebar />
       </BoardModalProvider>

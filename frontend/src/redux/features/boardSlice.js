@@ -53,6 +53,20 @@ export const updateBoard = createAsyncThunk(
   }
 );
 
+export const removeBoardMember = createAsyncThunk(
+  "board/removeBoardMember",
+  async ({ boardId, memberId }, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await boardsApi.removeMember(boardId, memberId);
+      // After removal, always refetch the latest members
+      await dispatch(getActiveBoardMembers(boardId));
+      return { boardId };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const boardSlice = createSlice({
   name: 'kanban',
   initialState: {
@@ -151,6 +165,16 @@ export const boardSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         toast.error("Failed to update board");
+      })
+
+      .addCase(removeBoardMember.fulfilled, (state, action) => {
+        state.isLoading = false;
+        toast.success("Member removed successfully");
+      })
+      .addCase(removeBoardMember.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        toast.error("Failed to remove member");
       })
 
   },
