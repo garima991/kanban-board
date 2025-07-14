@@ -7,18 +7,18 @@ export const fetchBoards = createAsyncThunk("board/fetchBoards", async (_, { rej
   try {
     const res = await boardsApi.getBoards();
     return res.data.boards;
-  } catch (error){
-      rejectWithValue(error.response?.data?.message || error.message);
-    }
+  } catch (error) {
+    rejectWithValue(error.response?.data?.message || error.message);
+  }
 });
 
 export const createBoard = createAsyncThunk("board/createBoard", async (boardData, { dispatch, rejectWithValue }) => {
   try {
     const res = await boardsApi.createBoard(boardData);
     return res.data.board;
-  }catch (error){
-      rejectWithValue(error.response?.data?.message || error.message);
-    }
+  } catch (error) {
+    rejectWithValue(error.response?.data?.message || error.message);
+  }
 });
 
 export const getActiveBoardMembers = createAsyncThunk("board/getBoardMembers", async (boardId, { rejectWithValue }) => {
@@ -26,9 +26,9 @@ export const getActiveBoardMembers = createAsyncThunk("board/getBoardMembers", a
     const res = await boardsApi.getBoardMembers(boardId);
     return res.data.members;
   }
-  catch (error){
-      rejectWithValue(error.response?.data?.message || error.message);
-    }
+  catch (error) {
+    rejectWithValue(error.response?.data?.message || error.message);
+  }
 });
 
 export const addBoardMember = createAsyncThunk("board/addBoardMember", async ({ boardId, memberData }, { rejectWithValue }) => {
@@ -36,10 +36,36 @@ export const addBoardMember = createAsyncThunk("board/addBoardMember", async ({ 
     const res = await boardsApi.addMember(boardId, memberData);
     return res.data.members;
   }
-  catch (error){
-      rejectWithValue(error.response?.data?.message || error.message);
+  catch (error) {
+    rejectWithValue(error.response?.data?.message || error.message);
+  }
+});
+
+export const updateBoard = createAsyncThunk(
+  "board/updateBoard",
+  async ({ boardId, name }, { rejectWithValue }) => {
+    try {
+      const res = await boardsApi.updateBoard(boardId, { name });
+      return res.data.board;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
-})
+  }
+);
+
+export const removeBoardMember = createAsyncThunk(
+  "board/removeBoardMember",
+  async ({ boardId, memberId }, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await boardsApi.removeMember(boardId, memberId);
+      // After removal, always refetch the latest members
+      await dispatch(getActiveBoardMembers(boardId));
+      return { boardId };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
 
 export const boardSlice = createSlice({
   name: 'kanban',
@@ -63,7 +89,7 @@ export const boardSlice = createSlice({
       state.value.forEach((board) => {
         board.isActive = board.name === boardName;
       })
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -121,6 +147,34 @@ export const boardSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         toast.error("Failed to add member");
+      })
+
+      //update board
+      .addCase(updateBoard.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateBoard.fulfilled, (state, action) => {
+        const updatedBoard = action.payload;
+        const idx = state.value.findIndex(b => b._id === updatedBoard._id);
+        if (idx !== -1) {
+          state.value[idx] = { ...state.value[idx], ...updatedBoard };
+        }
+        toast.success("Board updated successfully!");
+      })
+      .addCase(updateBoard.rejected, (state, action) => {  
+        state.isLoading = false;
+        state.error = action.payload;
+        toast.error("Failed to update board");
+      })
+
+      .addCase(removeBoardMember.fulfilled, (state, action) => {
+        state.isLoading = false;
+        toast.success("Member removed successfully");
+      })
+      .addCase(removeBoardMember.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        toast.error("Failed to remove member");
       })
 
   },

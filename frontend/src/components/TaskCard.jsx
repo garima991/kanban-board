@@ -44,8 +44,8 @@ const TaskCard = ({ task, onTaskClick }) => {
 
   return (
     <div
-      className={`w-full flex flex-col gap-2 bg-white shadow-lg p-3 rounded-md border-l-4 border-blue-300 hover:shadow-xl transition-all duration-200 ease-in-out cursor-${
-        isOnline ? "grabb" : "not-allowed"
+      className={`w-full flex flex-col gap-2 bg-white dark:bg-[#171C22] shadow-lg p-3 rounded-md border-[1.5px] border-gray-300 border-l-4 border-l-blue-300 dark:border-gray-900 dark:border-l-gray-950 hover:shadow-xl transition-all duration-200 ease-in-out cursor-${
+        isOnline ? "grab" : "not-allowed"
       }`}
       draggable={isOnline}
       onDragStart={handleDrag}
@@ -53,7 +53,7 @@ const TaskCard = ({ task, onTaskClick }) => {
     >
       <div className="flex gap-2">
         {task?.tags && (
-          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-500 border rounded">
+          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-500 dark:text-black border rounded">
             {task?.tags}
           </span>
         )}
@@ -61,10 +61,10 @@ const TaskCard = ({ task, onTaskClick }) => {
           <span
             className={`px-2 py-1 text-xs bg-gray-100 border rounded ${
               task.priority === "Low"
-                ? "bg-green-200 text-green-800"
+                ? "bg-green-100 text-green-800"
                 : task.priority === "Medium"
-                ? "bg-orange-200 text-orange-800"
-                : "bg-red-200 text-red-800"
+                ? "bg-orange-100 text-orange-800"
+                : "bg-red-100 text-red-800"
             }`}
           >
             {task.priority}
@@ -72,8 +72,8 @@ const TaskCard = ({ task, onTaskClick }) => {
         )}
       </div>
       <div className="flex flex-col items-start ml-4 w-[90%] truncate">
-        <h3 className="text-lg font-semibold truncate">{task.title}</h3>
-        <p className="text-sm text-gray-600 truncate">{task.description}</p>
+        <h3 className="text-lg font-semibold truncate dark:text-white">{task.title}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300 truncate">{task.description}</p>
       </div>
       <hr className="my-1 text-gray-300" />
       <div className="flex justify-between items-center text-xs text-gray-500 px-1">
@@ -81,14 +81,14 @@ const TaskCard = ({ task, onTaskClick }) => {
           {assignees?.map((user) => (
             <span
               key={user._id}
-              className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ring-2 ring-white bg-blue-50 text-blue-900 border-2 border-gray-300"
+              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ring-1 ring-blue-500 dark:ring-gray-300 bg-blue-50 dark:bg-gray-900 text-blue-900 dark:text-gray-300 hover:cursor-pointer"
               title={user.name}
             >
               {getInitials(user.name)}
             </span>
           ))}
         </div>
-        <span className="flex gap-1">
+        <span className="flex gap-1 dark:text-white">
           {task.subtasks?.length > 0 && (
             <span className="flex gap-1">
               {" "}

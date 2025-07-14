@@ -12,6 +12,8 @@ import NetworkListener from "./components/NetworkListener";
 
 function App() {
    const dispatch = useDispatch();
+   const theme = useSelector((state) => state.app.theme);
+
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -29,7 +31,16 @@ function App() {
     initAuth();
   }, [dispatch]);
 
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
   return (
+    <div className="dark:bg-[#0E1118]">
     <BrowserRouter>
     <NetworkListener />
       <Toaster position="top-right" reverseOrder={false} />
@@ -51,6 +62,7 @@ function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </div>
   );
 }
 

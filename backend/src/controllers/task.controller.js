@@ -309,3 +309,26 @@ export const changeTaskStatus = async (req, res) => {
     res.status(500).json({ message: "Failed to update task status", error: error.message });
   }
 };
+
+/**
+ * @desc Add a comment to a task
+ * @route POST /boards/:boardId/tasks/:taskId/comments
+ * @access Private (Task members)
+ */
+export const addComment = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { comment } = req.body;
+    if (!comment || !comment.trim()) {
+      return res.status(400).json({ message: "Comment content is required" });
+    }
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+    task.comments.push({ content: comment, user: req.user._id });
+    await task.save();
+    await task.populate({ path: 'comments.user', select: 'name email' });
+    res.status(201).json({ message: "Comment added successfully", task });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to add comment", error: error.message });
+  }
+};

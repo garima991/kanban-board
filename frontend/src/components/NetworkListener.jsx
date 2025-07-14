@@ -46,10 +46,10 @@ const NetworkListener = () => {
 
   // Show reminder toast on route change if still offline
   useEffect(() => {
-    if (!isOnline && !hasShownOfflineToast.current) {
+    if (!isOnline && !wasOfflineBefore.current) {
       if (toastIdRef.current) toast.dismiss(toastIdRef.current);
       toastIdRef.current = toast.error("You are still offline");
-      hasShownOfflineToast.current = true;
+      wasOfflineBefore.current = true;
     }
   }, [location.pathname, isOnline]);
 

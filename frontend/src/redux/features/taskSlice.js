@@ -45,7 +45,6 @@ export const addSubtask = createAsyncThunk(
   async ({ boardId, taskId, title }, { dispatch, rejectWithValue }) => {
     try {
       const res = await tasksApi.addSubtask(boardId, taskId, { title });
-      dispatch(fetchTasks(boardId));
       return res.data.task;
     }
     catch (error) {
@@ -86,7 +85,7 @@ export const updateTask = createAsyncThunk(
       return res.data.task;
     }
     catch (error){
-      rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   });
 
@@ -96,9 +95,22 @@ export const assignTask = createAsyncThunk("task/assignTask", async ({ boardId, 
     const res = await tasksApi.assignTask(boardId, taskId, userId);
     return res.data;
   } catch (error){
-      rejectWithValue(error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
 })
+
+export const removeTaskMember = createAsyncThunk(
+  "task/removeTaskMember",
+  async ({ boardId, taskId, userId }, { rejectWithValue }) => {
+    try {
+      const res = await tasksApi.removeTaskMember(boardId, taskId, userId);
+      return res.data.task;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 
 
 // Slice
@@ -241,8 +253,9 @@ const taskSlice = createSlice({
         toast.success("Task updated successfully");
       })
       .addCase(updateTask.rejected, (state, action) => {
+        state.isTaskLoading = false;
         state.error = action.payload;
-        toast.error("Failed to update task", error);
+        toast.error(`Failed to update task: ${action.payload}`);
       })
 
       // assign task
@@ -260,8 +273,29 @@ const taskSlice = createSlice({
         toast.success("Assigned successfully");
       })
       .addCase(assignTask.rejected, (state, action) => {
-        state.loading = false;
-        toast.error("Failed to assign user");
+        state.isTaskLoading = false;
+        state.error = action.payload;
+        toast.error(`Failed to assign user : ${action.payload}`);
+      })
+
+      // Remove Task Member
+      .addCase(removeTaskMember.pending, (state) => {
+        state.isTaskLoading = true;
+        state.error = null;
+      })
+      .addCase(removeTaskMember.fulfilled, (state, action) => {
+        state.isTaskLoading = false;
+        const updated = action.payload;
+        const index = state.tasks.findIndex(task => task._id === updated._id);
+        if (index !== -1) {
+          state.tasks[index] = updated;
+        }
+        toast.success("Member removed from task");
+      })
+      .addCase(removeTaskMember.rejected, (state, action) => {
+        state.isTaskLoading = false;
+        state.error = action.payload;
+        toast.error(`Failed to remove member: ${action.payload}`);
       })
 
   },

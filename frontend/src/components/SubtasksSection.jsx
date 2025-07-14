@@ -110,12 +110,12 @@ const SubtasksSection = ({ task }) => {
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
                   onKeyDown={(e) => handleEditKeyDown(e, subtask)}
-                  className="flex-1 border rounded px-2 py-1 text-sm"
+                  className="flex-1 border rounded px-2 py-1 text-sm dark:text-white"
                   autoFocus
                 />
               ) : (
                 <span
-                  className={`flex-1 ${
+                  className={`flex-1 dark:text-white ${
                     subtask.isCompleted ? "line-through text-gray-400" : ""
                   }`}
                 >
