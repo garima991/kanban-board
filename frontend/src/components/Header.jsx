@@ -167,21 +167,21 @@ const Header = ({ activeView, setActiveView }) => {
                 className="fixed inset-0 w-screen h-screen bg-black/10 z-30"
               />
 
-              <div className="absolute right-4 top-14 z-40 bg-white border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64">
+              <div className="absolute right-4 top-14 z-40 bg-white dark:bg-[#0F131E] border border-gray-300 rounded-md shadow-md p-3 mt-2 w-64">
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={inviteInput}
                   onChange={(e) => setInviteInput(e.target.value)}
-                  className="w-full px-2 py-1 border rounded-md mb-2 outline-none "
+                  className="w-full px-2 py-1 border rounded-md mb-2 outline-none dark:text-black"
                 />
                 {userDropdown.length > 0 ? (
-                  <ul className="max-h-40 overflow-y-auto space-y-1">
+                  <ul className="max-h-40 overflow-y-auto space-y-1 dark:bg-[#0F131E]">
                     {userDropdown.map((user) => (
                       <li
                         key={user._id}
                         onClick={() => handleAddBoardMember(user._id)}
-                        className="flex justify-start items-center gap-1 cursor-pointer hover:bg-blue-100 px-2 py-1 rounded"
+                        className="flex justify-start items-center gap-1 cursor-pointer hover:bg-blue-100 hover:dark:bg-[#29323c] px-2 py-1 rounded"
                       >
                         <span className="text-sm text-nowrap">{user.name}</span>{" "}
                         -{" "}
