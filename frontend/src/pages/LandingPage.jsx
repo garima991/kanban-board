@@ -7,16 +7,16 @@ import { Link } from "react-router-dom";
 import dashboardPreview from "../assets/dashboard-preview.png";
 
 const LandingPage = () => {
-  const scrollToDemo = () => {
-    const element = document.getElementById("demo");
-    const yOffset = -100;
-    const y =
-      element?.getBoundingClientRect().top + window.pageYOffset + yOffset;
+  // const scrollToDemo = () => {
+  //   const element = document.getElementById("demo");
+  //   const yOffset = -100;
+  //   const y =
+  //     element?.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
-    if (element) {
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
+  //   if (element) {
+  //     window.scrollTo({ top: y, behavior: "smooth" });
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-100 flex flex-col gap-4">
@@ -59,12 +59,11 @@ const LandingPage = () => {
             Simplify task tracking and supercharge your team's productivity with
             our powerful and intuitive Kanban board.
           </p>
-          <button
-            onClick={scrollToDemo}
+          <Link to = "/auth"
             className="px-6 py-3 bg-blue-950 text-white font-semibold rounded-xl hover:bg-blue-200 hover:text-blue-950 hover:border-2 hover:border-blue-900 transition-all duration-200 shadow-lg"
           >
             Let’s Get Started!
-          </button>
+          </Link>
         </motion.div>
 
         {/* App Preview Image */}
