@@ -6,7 +6,7 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: ['https://taskora.garima.tech/', 'https://taskora-three.vercel.app', 'http://localhost:5173', 'https://kanban-board-nine-jade.vercel.app/'], // frontend origin
+  origin: ['https://taskora.garima.tech/', 'https://taskora-three.vercel.app', 'http://localhost:5173', 'https://kanban-board-nine-jade.vercel.app'], // frontend origin
   credentials: true
 }));
 app.use(express.json({ limit: '16kb' }));
