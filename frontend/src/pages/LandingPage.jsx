@@ -5,18 +5,20 @@ import FeatureSteps from "../components/FeatureSteps";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import dashboardPreview from "../assets/dashboard-preview.png";
+import { tryDemo } from "../redux/features/authSlice";
+import { useDispatch } from "react-redux";
 
 const LandingPage = () => {
-  // const scrollToDemo = () => {
-  //   const element = document.getElementById("demo");
-  //   const yOffset = -100;
-  //   const y =
-  //     element?.getBoundingClientRect().top + window.pageYOffset + yOffset;
+  const dispatch = useDispatch();
 
-  //   if (element) {
-  //     window.scrollTo({ top: y, behavior: "smooth" });
-  //   }
-  // };
+  const handleDemoLogin = async () => {
+    try {
+      await dispatch(tryDemo());
+      window.location.href = "/member/dashboard"; 
+    } catch (err) {
+      console.error("Demo login failed:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-200 to-blue-100 flex flex-col gap-4">
@@ -59,11 +61,20 @@ const LandingPage = () => {
             Simplify task tracking and supercharge your team's productivity with
             our powerful and intuitive Kanban board.
           </p>
-          <Link to = "/auth"
-            className="px-6 py-3 bg-blue-950 text-white font-semibold rounded-xl hover:bg-blue-200 hover:text-blue-950 hover:border-2 hover:border-blue-900 transition-all duration-200 shadow-lg"
-          >
-            Let’s Get Started!
-          </Link>
+          <div className="flex gap-4">
+            <Link
+              to="/auth"
+              className="px-6 py-3 bg-blue-950 text-white font-semibold rounded-xl hover:bg-blue-200 hover:text-blue-950 hover:border-2 hover:border-blue-900 transition-all duration-200 shadow-lg"
+            >
+              Let’s Get Started!
+            </Link>
+            <button
+              onClick={handleDemoLogin}
+              className="px-6 py-3 border-2 border-blue-950 text-blue-950 font-semibold rounded-xl hover:bg-blue-950 hover:text-white transition-all duration-200 shadow-lg"
+            >
+              Try Demo
+            </button>
+          </div>
         </motion.div>
 
         {/* App Preview Image */}

@@ -16,14 +16,16 @@ const generateTokens = async (user) => {
 
 /**
  * @desc register a new user
- * @route POST /auth/signup
+ * @route POST /auth/register
  * @access Public
  */
 
 export const registerUser = async (req, res) => {
-  try {
-    const { name, email, username, password, confirmPassword } = req.body;
+  console.log(req.body);
 
+  try {
+    const { name, email, username, password, confirmPassword, role } = req.body;
+    
     // validate the signup data
     const { isValid, errors } = validateSignUpData({ name, username, email, password, confirmPassword });
 
@@ -40,12 +42,12 @@ export const registerUser = async (req, res) => {
         errors: { email: "An account with this email already exists" }
       });
     }
-
-    const user = await User.create({
+     const user = await User.create({
       name,
       email,
       username: username.toLowerCase(),
       password,
+      role,
     });
 
     const { accessToken, refreshToken } = await generateTokens(user);

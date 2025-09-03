@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   isOnline: navigator.onLine, 
-  theme: "dark",
+  theme: "light",
 };
 
 const appSlice = createSlice({

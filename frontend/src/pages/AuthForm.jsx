@@ -20,10 +20,10 @@ export default function AuthPage() {
     role: "member",
   });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-   
-  const {user, errorMessage, fieldErrors, loading } = useSelector(
+
+  const { user, errorMessage, fieldErrors, loading } = useSelector(
     (state) => state.auth
   );
 
@@ -62,13 +62,13 @@ export default function AuthPage() {
         })
       ).unwrap();
 
-      const role = user.role;
-        console.log(role);
-        if (role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/member/dashboard");
-        }
+      const role = result.role;
+      console.log(role);
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/member/dashboard");
+      }
     } else {
       const resultAction = await dispatch(
         registerUser({
@@ -148,6 +148,7 @@ export default function AuthPage() {
                     label="Full Name"
                     name="name"
                     placeholder="Clay Jensen"
+                    value={formData.name}
                     onChange={handleChange}
                     error={fieldErrors.name}
                   />
@@ -156,6 +157,7 @@ export default function AuthPage() {
                     name="username"
                     placeholder="JensenClay123"
                     minLength={5}
+                    value={formData.username}
                     onChange={handleChange}
                     error={fieldErrors.username}
                   />
@@ -167,6 +169,7 @@ export default function AuthPage() {
                 name="email"
                 type="email"
                 placeholder="you@example.com"
+                value={formData.email}
                 onChange={handleChange}
                 error={fieldErrors.email}
               />
@@ -176,6 +179,7 @@ export default function AuthPage() {
                 type="password"
                 placeholder={isLoggedIn ? "••••••••" : "At least 8 characters"}
                 minLength={8}
+                value={formData.password}
                 onChange={handleChange}
                 error={fieldErrors.password}
               />
@@ -185,6 +189,7 @@ export default function AuthPage() {
                   name="confirmPassword"
                   type="password"
                   placeholder="Confirm password"
+                  value={formData.confirmPassword}
                   onChange={handleChange}
                   error={fieldErrors.confirmPassword}
                 />
@@ -200,14 +205,15 @@ export default function AuthPage() {
   );
 }
 
-function Input({ label, type = "text", placeholder, onChange, error, ...props }) {
+function Input({ label,name, type = "text", placeholder, value, onChange, error, ...props }) {
   return (
     <div className="relative">
       <input
         type={type}
         placeholder={placeholder}
+        value={value}       
         onChange={onChange}
-        {...props}
+        name = {name}
         className="w-full px-4 py-3 text-sm text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-800"
       />
       <label className="absolute left-4 -top-2 text-xs bg-white px-1 text-gray-500">
@@ -218,13 +224,13 @@ function Input({ label, type = "text", placeholder, onChange, error, ...props })
   );
 }
 
-function AuthButton({ text}) {
+function AuthButton({ text }) {
   const isOnline = useSelector((state) => state.app.isOnline);
   return (
     <button
       type="submit"
       className="w-full py-2.5 bg-blue-800 hover:bg-blue-900 disabled:bg-opacity-60 text-white rounded-md text-sm font-medium transition"
-      disabled={!isOnline }
+      disabled={!isOnline}
     >
       {text}
     </button>

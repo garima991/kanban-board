@@ -10,7 +10,7 @@ const PrivateRoute = ({ allowedRoles = [] }) => {
   // Show loading state while checking authentication
   if (!authChecked) {
     return (
-      <div className="w-screen h-screen mt-40 flex flex-row justify-center items-center">
+      <div className="h-screen w-full mt-40 flex flex-row justify-center items-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
         <div className="ml-3 text-gray-600 ">Checking authentication...</div>
       </div>

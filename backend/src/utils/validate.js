@@ -24,7 +24,7 @@ export const validateSignUpData = (rawData) => {
 
   if (!data.email) {
     errors.email = 'Email is required';
-  } else if (!validator.isEmail(data.mail)) {
+  } else if (!validator.isEmail(data.email)) {
     errors.email = 'Email is not valid';
   }
 

@@ -22,7 +22,7 @@ export const registerUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authApi.register(credentials);
-      return response.data;
+      return response.data.user;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: "Registration Failed." });
     }
@@ -68,6 +68,20 @@ export const getMe = createAsyncThunk(
     }
   }
 );
+
+
+export const tryDemo = createAsyncThunk(
+  "auth/tryDemo",
+  async (_, { dispatch }) => {
+    const demoCredentials = {
+      email: `${import.meta.env.VITE_DEMO_USER_EMAIL}`,
+      password: `${import.meta.env.VITE_DEMO_USER_PASSWORD}`
+    };
+    // reuse loginUser thunk
+    return dispatch(loginUser(demoCredentials));
+  }
+);
+
 
 /* ───────────── INITIAL STATE ───────────── */
 

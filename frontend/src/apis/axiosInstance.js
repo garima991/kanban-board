@@ -32,37 +32,37 @@ axiosInstance.interceptors.request.use((config) => {
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  Automatically refresh the access token when it expires  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-axiosInstance.interceptors.response.use(
-    res => res, // If request is successful, return response
-    async (err) => {
-        const originalRequest = err.config;  // Get the failed request
-        if (!navigator.onLine) {
-            // Don’t auto-logout on offline
-            return Promise.reject(err);
-        }
+// axiosInstance.interceptors.response.use(
+//     res => res, // If request is successful, return response
+//     async (err) => {
+//         const originalRequest = err.config;  // Get the failed request
+//         if (!navigator.onLine) {
+//             // Don’t auto-logout on offline
+//             return Promise.reject(err);
+//         }
 
-        // If the error is 401 (Unauthorized) and the request hasn't been retried yet
-        if (err.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;  // Mark the request as retrying
+//         // If the error is 401 (Unauthorized) and the request hasn't been retried yet
+//         if (err.response?.status === 401 && !originalRequest._retry) {
+//             originalRequest._retry = true;  // Mark the request as retrying
 
-            try {
-                // Attempt to refresh the token
-                await authApi.refreshToken();
+//             try {
+//                 // Attempt to refresh the token
+//                 await authApi.refreshToken();
 
-                // Retry the original request after successful token refresh
-                return axiosInstance(originalRequest);
-            } catch (refreshError) {
-                // If refresh failed, log out the user and redirect to login page
-                await authApi.logout();
-                window.location.href = '/auth';  // Redirect to login page
-                return Promise.reject(refreshError);  // Reject the original request
-            }
-        }
+//                 // Retry the original request after successful token refresh
+//                 return axiosInstance(originalRequest);
+//             } catch (refreshError) {
+//                 // If refresh failed, log out the user and redirect to login page
+//                 await authApi.logout();
+//                 window.location.href = '/auth';  // Redirect to login page
+//                 return Promise.reject(refreshError);  // Reject the original request
+//             }
+//         }
 
-        // If it's not a 401 error, reject the error
-        return Promise.reject(err);
-    }
-);
+//         // If it's not a 401 error, reject the error
+//         return Promise.reject(err);
+//     }
+// );
 
 
 
