@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import {useBoardModal} from "../contexts/BoardModalContext"
 import { useDispatch } from "react-redux";
 import { createBoard } from "../redux/features/boardSlice";
+import DemoGuard from "../components/DemoGuard";
 
 const NewBoardModal = ({ initialName = "", onSubmit, submitText = "Create Board" }) => {
   const { setBoardFormOpen } = useBoardModal();
@@ -48,12 +49,14 @@ const NewBoardModal = ({ initialName = "", onSubmit, submitText = "Create Board"
         />
       </div>
 
-      <button
-        className="p-1 bg-blue-900 rounded-lg text-white"
-        onClick={handleSubmit}
-      >
-        {submitText}
-      </button>
+      <DemoGuard allowed={false} message="Demo user cannot create or update boards.">
+        <button
+          className="p-1 bg-blue-900 rounded-lg text-white"
+          onClick={handleSubmit}
+        >
+          {submitText}
+        </button>
+      </DemoGuard>
     </div>
   );
 };

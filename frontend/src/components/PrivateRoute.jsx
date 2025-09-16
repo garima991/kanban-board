@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 
-const PrivateRoute = ({ allowedRoles = [] }) => {
+const PrivateRoute = ({ allowedRoles = [], denyForDemo = false }) => {
 
   const { user, authChecked } = useSelector((state) => state.auth);
   const isOnline = useSelector((state) => state.app.isOnline);

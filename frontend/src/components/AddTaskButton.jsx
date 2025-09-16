@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTaskModal } from "../contexts/TaskModalContext";
 import AddTaskForm from "../modals/AddTaskForm";
 import { useSelector } from "react-redux";
+import DemoGuard from "./DemoGuard";
 
 const AddTaskButton = () => {
   const {setTaskFormOpen} = useTaskModal();
@@ -9,13 +10,15 @@ const AddTaskButton = () => {
 
   return (
     <div >
-      <button
-        onClick={() => setTaskFormOpen(true)}
-        className="bg-black text-white font-medium px-4 py-1 rounded-lg hover:opacity-90 disabled:bg-opacity-70 disabled:cursor-not-allowed"
-        disabled = {!isOnline}
-      >
-         + New Task
-      </button>
+      <DemoGuard allowed={false} message="Demo user cannot create tasks.">
+        <button
+          onClick={() => setTaskFormOpen(true)}
+          className="bg-black text-white font-medium px-4 py-1 rounded-lg hover:opacity-90 disabled:bg-opacity-70 disabled:cursor-not-allowed"
+          disabled = {!isOnline}
+        >
+           + New Task
+        </button>
+      </DemoGuard>
       <AddTaskModal />
     </div>
   );

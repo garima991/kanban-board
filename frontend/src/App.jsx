@@ -9,25 +9,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getMe, refreshUser } from "./redux/features/authSlice";
 import NetworkListener from "./components/NetworkListener";
+import PublicRoute from "./components/PublicRoute";
 
 function App() {
-   const dispatch = useDispatch();
-   const theme = useSelector((state) => state.app.theme);
+  const dispatch = useDispatch();
+  const theme = useSelector((state) => state.app.theme);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        await dispatch(getMe()); // try to get user with accessToken
-
+        await dispatch(getMe());
+        console.log("User is logged in");
       } catch (err) {
         try {
-          await dispatch(refreshUser()); // If failed, try refreshing token
+          await dispatch(refreshUser());
         } catch (refreshErr) {
           console.log("User not logged in");
         }
       }
     };
-
     initAuth();
   }, [dispatch]);
 
@@ -41,27 +41,36 @@ function App() {
 
   return (
     <div className="dark:bg-[#0E1118]">
-    <BrowserRouter>
-    <NetworkListener />
-      <Toaster position="top-right" reverseOrder={false} />
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={<AuthForm />} />
-        <Route path="/unauthorised" />
+      <BrowserRouter>
+        <NetworkListener />
+        <Toaster position="top-right" reverseOrder={false} />
+        <Routes>
+          
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth" element={<AuthForm />} />
+          </Route>
 
-        {/* Admin Routes*/}
-        <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
-          <Route path="/admin/dashboard" element={<DashboardLayout />} />
-          {/* <Route path ="/admin/tasks" element={<ManageTasks />}/> */}
-        </Route>
+          <Route
+            path="/unauthorized"
+            element={
+              <div className="text-center mt-60 text-gray-600 font-bold text-2xl">
+                You are not authorized to view this page.
+              </div>
+            }
+          />
 
-        <Route element={<PrivateRoute allowedRoles={["member"]} />}>
-          <Route path="/member/dashboard" element={<DashboardLayout />} />
-          {/* <Route path ="/user/task-detail/:taskId" element={<TaskDetailView/>} /> */}
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* Admin */}
+          <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
+            <Route path="/admin/dashboard" element={<DashboardLayout />} />
+          </Route>
+
+          {/* Member */}
+          <Route element={<PrivateRoute allowedRoles={["member"]} />}>
+            <Route path="/member/dashboard" element={<DashboardLayout />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

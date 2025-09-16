@@ -23,9 +23,18 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { user, errorMessage, fieldErrors, loading } = useSelector(
+  const { user, errorMessage, fieldErrors, authChecked } = useSelector(
     (state) => state.auth
   );
+
+  // Redirect if already logged in once auth has been checked
+  useEffect(() => {
+    if (!authChecked) return;
+    if (user) {
+      const role = user.role === "admin" ? "admin" : "member";
+      navigate(`/${role}/dashboard`, { replace: true });
+    }
+  }, [user, authChecked, navigate]);
 
   // Clear form & field errors on mode switch
   useEffect(() => {
@@ -62,13 +71,8 @@ export default function AuthPage() {
         })
       ).unwrap();
 
-      const role = result.role;
-      console.log(role);
-      if (role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/member/dashboard");
-      }
+      const role = result.role === "admin" ? "admin" : "member";
+      navigate(`/${role}/dashboard`, { replace: true });
     } else {
       const resultAction = await dispatch(
         registerUser({
@@ -211,9 +215,9 @@ function Input({ label,name, type = "text", placeholder, value, onChange, error,
       <input
         type={type}
         placeholder={placeholder}
-        value={value}       
+        value={value}
         onChange={onChange}
-        name = {name}
+        name={name}
         className="w-full px-4 py-3 text-sm text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-800"
       />
       <label className="absolute left-4 -top-2 text-xs bg-white px-1 text-gray-500">

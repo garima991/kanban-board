@@ -15,6 +15,7 @@ import { GoListUnordered, GoPersonAdd } from "react-icons/go";
 import NewBoardModal from "../modals/NewBoardModal";
 import { FiEdit2, FiSun, FiMoon } from "react-icons/fi";
 import { setTheme } from "../redux/features/appSlice";
+import DemoGuard from "./DemoGuard";
 
 const ThemeToggle = () => {
   const dispatch = useDispatch();
@@ -137,26 +138,30 @@ const Header = ({ activeView, setActiveView }) => {
               >
                 {getInitials(member.name)}
                 {activeBoard?.admin === user._id && member._id !== user._id && (
-                  <button
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                    title="Remove from board"
-                    onClick={() => dispatch(removeBoardMember({ boardId: activeBoard._id, memberId: member._id }))}
-                  >
-                    ×
-                  </button>
+                  <DemoGuard allowed={false} message="Demo user cannot remove members.">
+                    <button
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                      title="Remove from board"
+                      onClick={() => dispatch(removeBoardMember({ boardId: activeBoard._id, memberId: member._id }))}
+                    >
+                      ×
+                    </button>
+                  </DemoGuard>
                 )}
               </span>
             ))}
           </div>
 
           {activeBoard?.admin === user._id && (
-            <button
-              className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed"
-              onClick={() => setShowUsers(!showUsers)}
-              disabled={!isOnline}
-            >
-              <GoPersonAdd /> <span className="hidden xs:inline">Invite</span>
-            </button>
+            <DemoGuard allowed={false} message="Demo user cannot invite members.">
+              <button
+                className="flex items-center gap-2 bg-white px-2 py-1 text-black border-2 text-sm rounded-md hover:bg-blue-50 hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed"
+                onClick={() => setShowUsers(!showUsers)}
+                disabled={!isOnline}
+              >
+                <GoPersonAdd /> <span className="hidden xs:inline">Invite</span>
+              </button>
+            </DemoGuard>
           )}
           {showUsers && (
             <>
