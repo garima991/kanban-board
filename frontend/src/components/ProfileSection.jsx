@@ -13,7 +13,7 @@ const ProfileSection = ({ open }) => {
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
 
   const handleLogout = async () => {
-    dispatch(logoutUser());
+   await dispatch(logoutUser());
     navigate("/auth");
   };
 
