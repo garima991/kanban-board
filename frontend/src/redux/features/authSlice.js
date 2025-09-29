@@ -35,7 +35,9 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authApi.logout();
+      return true;
     } catch (error) {
+      // Even if the request fails (e.g., network, expired cookie), proceed to clear local state
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
@@ -154,10 +156,13 @@ const authSlice = createSlice({
         state.fieldErrors = {};
         state.errorMessage = null;
       })
-      .addCase(logoutUser.rejected, (state, action) => {
+      .addCase(logoutUser.rejected, (state) => {
+        // Treat logout errors as non-fatal: clear local auth state anyway
         state.loading = false;
+        state.user = null;
+        state.authChecked = true;
         state.fieldErrors = {};
-        state.errorMessage = action.payload;
+        state.errorMessage = null;
       })
 
       // Refresh

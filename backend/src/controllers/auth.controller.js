@@ -143,8 +143,18 @@ export const loginUser = async (req, res) => {
 
   export const logoutUser = async (req, res) => {
     try {
-      await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } });
-      res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" });
+      // Best-effort: if authenticated, remove refresh token from DB; otherwise ignore
+      if (req.user?._id) {
+        await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } });
+      }
+
+      // Clear cookies using the same attributes used when setting them
+      const cookieOptions = { httpOnly: true, sameSite: "none", secure: true, path: "/" };
+
+      res
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
+        .json({ message: "Logged out" });
     } catch (error) {
       res.status(500).json({ message: "Logout failed", error: error.message });
     }
